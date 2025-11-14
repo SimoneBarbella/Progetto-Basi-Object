@@ -1,0 +1,178 @@
+\section{Dizionoari}
+\subsection{Dizionario delle Classi}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{table}[H] % oppure [htbp]
+\centering
+\resizebox{0.9\textwidth}{!}{
+\begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
+                {\centering\arraybackslash}m{0.28\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
+
+                \hline
+    \textbf{Classe} & \textbf{Descrizione} & \textbf{Attributi} \\
+    \hline
+    \multirow{12}{=}{\centering Utente} & \multirow{12}{=}{\centering Descrittore di ogni Studente o Chef } &
+\texttt{email} (String): è un indirizzo mail unico e valido che permette di contattare l’utente.\\
+
+& & \texttt{nome} (String): è il nome dell' utente.\\
+
+& & \texttt{cognome} (String): è cognome di ogni utente \\
+
+& & \texttt{password} (String): una password permette ad ogni utente di proteggere il suo account e le sue informazioni.\\
+
+& & \texttt{specializzazione} (String): specifica il titolo dello cehf\\
+
+& & \texttt{matricola} (String): string alfanumerica che identifica lo studente \\ 
+
+& & \texttt{tipoutente} (TipoUtente): indica il tipo di utente (chef) (studente) oppure (chefStudente) \\
+
+
+\hline
+\multirow{8}{=}{\centering Corso} & \multirow{8}{=}{\centering Descrittore di ciascun corso creato e partecipato dagli utenti.} &
+\texttt{dataCorso} (Data): indica l'inizio del corso.\\
+
+& & \texttt{nome} (String): è il nome che assume il corso. \\
+
+& & \texttt{categoria} (String): sono tutte le categiore che può assumerre il corso \\
+
+& & \texttt{frequenza} (Data): indica ogni quanti giorni il corso sì svloge\\
+
+& & \texttt{numPartecipanti} (Int): Numero dei partecipanti facente parte dal corso \\
+\hline
+
+\multirow{3}{=}{\centering Iscrizione} & \multirow{3}{=}{\centering Descrittore di dell'iscrizione degli utenti.} &
+\texttt{dataIscrizione} (Data): indica l'inizio dell'iscrizione per un corso.\\
+
+& & \texttt{Stato} (String): indica lo stato di uno studente per l'iscrizione ad un corso \\
+
+\hline
+
+\end{tabular}
+}
+\caption{Dizionario delle Classi:1}
+\label{tab:classi1}
+\end{table}
+
+
+
+
+\begin{table}[H] % oppure [htbp]
+\centering
+\resizebox{0.9\textwidth}{!}{
+\begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
+                {\centering\arraybackslash}m{0.28\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
+
+                \hline
+    \textbf{Classe} & \textbf{Descrizione} & \textbf{Attributi} \\
+    \hline
+    \multirow{12}{=}{\centering Sessione} & \multirow{12}{=}{\centering Descrittore di???} &
+\texttt{numSessioni} (Int): specifica quante sessioni ha un corso in presenza. \\
+& & \texttt{oraInizio} (Data): orario di inizio della sessione.\\
+
+& & \texttt{numAderenti} (Int): quanti studenti partecipano alla sessione. \\
+
+& & \texttt{quantità} (Double): la quantità degli ingredienti per la ogni studente cosi da evitare sprechi.\\
+
+& & \texttt{teoria} (String): ??\\
+
+& & \texttt{tipoSessione} (TipoSessione): Specifca del tipo di sessione se on-line o in presenza. \\ 
+
+
+
+\hline
+\multirow{8}{=}{\centering Ricetta} & \multirow{8}{=}{\centering Descrittore di??.} &
+\texttt{nome} (String): nome con il quale si identifica la ricetta.\\
+
+& & \texttt{descrizione} (String): è il procedimentio per comporre la ricetta. \\
+
+& & \texttt{tempo} (Data): tempo necessario per fare una ricetta. \\
+
+
+\hline
+
+\multirow{5}{=}{\centering Ingrediente} & \multirow{4}{=}{\centering Descrittore di ??.} &
+\texttt{nome} (String): nome dell'ingrediente per riconoscerlo.\\
+
+& & \texttt{unitàDiMisura} (String): spechifica del tipo di misura di un ingrediente ES: Kg, litri ecc.. .\\
+
+\hline
+
+
+\multirow{2}{=}{\centering Adesione} & \multirow{2}{=}{\centering Descrittore di ??.} &
+\texttt{dataAdesione} (Data): data relativa all'adesione di uno studente ad una sessione.\\
+
+
+\hline
+
+\multirow{2}{=}{\centering Richiede} & \multirow{2}{=}{\centering Descrittore di ??.} &
+\texttt{quantitàNecessaria} (Double): calcola la quantità di ogni singolo ingrediente per una ricetta.\\
+
+\hline
+
+\end{tabular}
+}
+\caption{Dizionario delle Classi: end}
+\label{tab:classi2}
+\end{table}
+
+
+
+\subsection{Dizionoario Assocazioni}
+
+
+\begin{table}[H] % oppure [htbp]
+\centering
+%\resizebox{1.\textwidth}{!}{
+\begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
+                {\centering\arraybackslash}m{0.28\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
+
+                \hline
+    \textbf{Associazine} & \textbf{Descrizione} & \textbf{Molteplicità delle Classi coinvolte} \\
+    \hline
+   \centering richiede & \centering Richiesta di Adesione da parte di uno studente & Utente [0..*] - Adesione [1] \\
+
+
+
+\hline
+
+  \centering richiede & \centering Richiesta di Iscrizione da parte di uno studente & Utente [0..*] - Iscrizione [1] \\
+
+\hline
+
+  \centering gestisce & \centering Gestione di un corso da parte di uno chef & Utente [1..*] - Corso [0..*] \\
+\hline
+
+  \centering compone & \centering Un corso è composto da vari tipi di sessioni  & Corso [1..*] - Sessione [1] \\
+\hline  
+
+
+
+  \centering prepara & \centering Ad ogni sesisone in presenza si prepara una ricetta & Sessione [1..*] - Ricetta [0..*] \\
+
+\hline
+
+  \centering haBisogno & \centering ogni ricetta haBisogno di sapere la quantità degli ingredienti  & Richiede [1] - Ricetta [1..*] \\
+
+\hline
+
+
+  \centering necessita & \centering Un ingrediente necesista di sapre la quantita per la ricetta & Ingrediente [1..*] - Richiede [1] \\
+
+\hline
+
+  \centering per & \centering Richiesta di adesione per una sessione in presenza & Adesione [1..*] - Sessione [1] \\
+
+\hline
+
+  \centering ??? & \centering Iscrizione di uno Studente per un corso & Inscrizione [0..*] - Corso [1] \\
+
+\hline
+
+\end{tabular}
+%}
+\caption{Dizionario delle assocazioni: }
+\label{tab:classi}
+\end{table}
+
+
+\subsection{Dizionario Vincoli}

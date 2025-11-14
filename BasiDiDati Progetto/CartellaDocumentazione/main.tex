@@ -1,0 +1,93 @@
+\documentclass[a4paper,12pt]{article}
+
+% Pacchetti di base
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{makecell}
+
+\usepackage{graphicx} % Per immagini
+\usepackage{pdfpages}
+
+\usepackage{geometry}
+
+\usepackage[table]{xcolor}
+\usepackage{titlesec}
+\usepackage{array}
+
+\usepackage{longtable}
+% da non utlizzare, va in conflitto con graphihicx \usepackage[margins=1in]{geometry} % Margini ottimizzati
+\usepackage{multirow, tabularx}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+
+%
+
+
+
+
+\usepackage{colortbl}   % Per colorare celle della tabella
+\usepackage{float}      % Per controllare la posizione delle tabelle
+
+
+
+% Configurazioni per link e titoli
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black
+}
+\renewcommand{\contentsname}{Indice}
+\renewcommand{\listtablename}{Elenco delle tabelle}
+
+
+\begin{document}
+
+
+\begin{figure} % [h] = here, posizione suggerita
+    \centering
+    \includegraphics[width=0.5\textwidth]{CartellaDocumentazione/Unina.png}
+
+\end{figure}
+
+
+
+
+% Titolo migliorato
+\title{UninaFoodLab}
+
+
+
+
+
+
+
+
+\author{
+    Nome e cognome \\ Matricola
+    \and
+    Simone Barbella \\ N86004906
+}
+\date{Anno Accademico 2024/2025}
+
+
+
+% Creazione del titolo
+\maketitle
+
+
+
+\clearpage
+
+% Indice e lista delle tabelle
+\tableofcontents
+
+\include{CartellaDocumentazione/Capitolo1}
+\include{CartellaDocumentazione/Capitolo2}
+\include{CartellaDocumentazione/Dizionari}
+
+
+\listoftables
+
+\end{document}
+
