@@ -3,6 +3,9 @@
 \renewcommand{\arraystretch}{1.3}
 
 \begin{table}[H] % oppure [htbp]
+\caption{Dizionario delle Classi:1}
+\label{tab:classi1}
+
 \centering
 \resizebox{0.9\textwidth}{!}{
 \begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
@@ -49,14 +52,15 @@
 
 \end{tabular}
 }
-\caption{Dizionario delle Classi:1}
-\label{tab:classi1}
+
 \end{table}
 
 
 
 
 \begin{table}[H] % oppure [htbp]
+\caption{Dizionario delle Classi: end}
+\label{tab:classi2}
 \centering
 \resizebox{0.9\textwidth}{!}{
 \begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
@@ -80,7 +84,7 @@
 
 
 \hline
-\multirow{8}{=}{\centering Ricetta} & \multirow{8}{=}{\centering Descrittore di??.} &
+\multirow{6}{=}{\centering Ricetta} & \multirow{6}{=}{\centering Descrittore di??.} &
 \texttt{nome} (String): nome con il quale si identifica la ricetta.\\
 
 & & \texttt{descrizione} (String): è il procedimentio per comporre la ricetta. \\
@@ -90,7 +94,7 @@
 
 \hline
 
-\multirow{5}{=}{\centering Ingrediente} & \multirow{4}{=}{\centering Descrittore di ??.} &
+\multirow{4}{=}{\centering Ingrediente} & \multirow{4}{=}{\centering Descrittore di ??.} &
 \texttt{nome} (String): nome dell'ingrediente per riconoscerlo.\\
 
 & & \texttt{unitàDiMisura} (String): spechifica del tipo di misura di un ingrediente ES: Kg, litri ecc.. .\\
@@ -98,21 +102,20 @@
 \hline
 
 
-\multirow{2}{=}{\centering Adesione} & \multirow{2}{=}{\centering Descrittore di ??.} &
+\centering Adesione & \centering Descrittore di ??. &
 \texttt{dataAdesione} (Data): data relativa all'adesione di uno studente ad una sessione.\\
 
 
 \hline
 
-\multirow{2}{=}{\centering Richiede} & \multirow{2}{=}{\centering Descrittore di ??.} &
+\centering Richiede & \centering Descrittore di ??. &
 \texttt{quantitàNecessaria} (Double): calcola la quantità di ogni singolo ingrediente per una ricetta.\\
 
 \hline
 
 \end{tabular}
 }
-\caption{Dizionario delle Classi: end}
-\label{tab:classi2}
+
 \end{table}
 
 
@@ -121,10 +124,13 @@
 
 
 \begin{table}[H] % oppure [htbp]
+\caption{Dizionario delle assocazioni: }
+\label{tab:classi} 
 \centering
 %\resizebox{1.\textwidth}{!}{
 \begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
                 {\centering\arraybackslash}m{0.28\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
+               
 
                 \hline
     \textbf{Associazine} & \textbf{Descrizione} & \textbf{Molteplicità delle Classi coinvolte} \\
@@ -142,37 +148,37 @@
   \centering gestisce & \centering Gestione di un corso da parte di uno chef & Utente [1..*] - Corso [0..*] \\
 \hline
 
-  \centering compone & \centering Un corso è composto da vari tipi di sessioni  & Corso [1..*] - Sessione [1] \\
+  \centering compone & \centering Un corso è composto da vari tipi di sessioni  & Corso [1] - Sessione [1..*] \\
 \hline  
 
 
 
-  \centering prepara & \centering Ad ogni sesisone in presenza si prepara una ricetta & Sessione [1..*] - Ricetta [0..*] \\
+  \centering prepara & \centering Ad ogni sesisone in presenza si prepara una ricetta & Sessione [0..*] - Ricetta [1..*] \\
 
 \hline
 
-  \centering haBisogno & \centering ogni ricetta haBisogno di sapere la quantità degli ingredienti  & Richiede [1] - Ricetta [1..*] \\
+  \centering haBisogno & \centering ogni ricetta haBisogno di sapere la quantità degli ingredienti  & Ricetta [1] - Richiede [1..*] \\
 
 \hline
 
 
-  \centering necessita & \centering Un ingrediente necesista di sapre la quantita per la ricetta & Ingrediente [1..*] - Richiede [1] \\
+  \centering necessita & \centering Un ingrediente necesista di sapre la quantita per la ricetta & Richiede [1..*] - Ingrediente [1] \\
 
 \hline
 
-  \centering per & \centering Richiesta di adesione per una sessione in presenza & Adesione [1..*] - Sessione [1] \\
+  \centering per & \centering Richiesta di adesione per una sessione in presenza & Adesione [1] - Sessione [0..*] \\
 
 \hline
 
-  \centering ??? & \centering Iscrizione di uno Studente per un corso & Inscrizione [0..*] - Corso [1] \\
+  \centering relativa & \centering Iscrizione di uno Studente per un corso & Inscrizione [1] - Corso [0..*] \\
 
 \hline
 
 \end{tabular}
 %}
-\caption{Dizionario delle assocazioni: }
-\label{tab:classi}
+
 \end{table}
 
-
+\clearpage
 \subsection{Dizionario Vincoli}
+\input{CartellaDocumentazione/Vincoli}

@@ -1,0 +1,31 @@
+\section{Schema Logico}
+\subsection{Tabelle}
+Leggenda:
+\begin{itemize}
+    \item Le parole con il \textbf{grassetto} sono indicate tutti i nomi delle tabelle
+    \item Le parole \underline {sottolinete} una volta indicano le chiavi primarie
+    \item Le parole \underline{\underline{sottolinate}} due volte indicano le chiavi esterne
+    \item Le parole in \textit{italico} indicano che una chiava primaria è composta da piu attributi 
+\end{itemize}
+
+\vspace{2em}
+
+\renewcommand{\arraystretch}{1.80}
+\begin{tabular}{lp{0.7\textwidth}} \hline
+    \textbf{Utente} & email, nome, cognome, password, specializzazione, matricola, tipoUtente, id\_corso\\ 
+    \hline
+    \textbf{Corso} & id\_corso, dataInizio, nome, categoria, frequenza, numPartecipanti, id\_sessione \\
+    \hline
+    \textbf{Sessione} & id\_sessione, numSessioni, oraInizio, numAderenti, quantità, teoria, TipoSessione, id\_ricetta, id\_corso\\
+    \hline
+    \textbf{Ricetta} & id\_ricetta, nome, descrizione, tempo, id\_sessione \\
+    \hline
+    \textbf{Ingrediente} & nome, unitàDiMisura\\
+    \hline
+    \textbf{Adesione} & dataAdesione, email,id\_sessione\\
+    \hline
+    \textbf{Iscrizione} & dataIscrizione, stato, email,id\_corso\\
+    \hline
+    \textbf{Richiede} & quantitàNecessaria, id\_ricetta, nomeIngrediente \\
+    \hline
+\end{tabular}

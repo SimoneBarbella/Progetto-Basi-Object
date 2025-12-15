@@ -1,0 +1,91 @@
+
+
+\renewcommand{\arraystretch}{1.3}
+
+\begin{center}
+\begin{longtable}{|>{\centering\arraybackslash}m{0.30\textwidth}|
+                  >{\centering\arraybackslash}m{0.22\textwidth}|
+                  >{\raggedright\arraybackslash}m{0.45\textwidth}|}
+\caption{Dizionario dei vincoli} \label{tab:vincoli} \\
+
+\hline
+\textbf{Vincolo} & \textbf{Tipo} & \textbf{Descrizione} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Vincolo} & \textbf{Tipo} & \textbf{Descrizione} \\
+\hline
+\endhead
+
+Email & Dominio & L’attributo “email” della classe Utente deve contenere una combinazione non nulla di lettere, numeri e simboli, seguiti da una chiocciola (“@”), altre lettere/simboli, un punto (“.”), e finire con almeno due lettere. \\
+\hline
+
+Password & Dominio & L’attributo “password” della classe Utente deve essere lungo almeno 8 caratteri, e avere almeno una lettera maiuscola, una minuscola, un numero e un carattere speciale. \\
+\hline
+
+Nome & Dominio & L’attributo “Nome” della classe Utente deve contenere solo stringhe di caratteri alfabetici, non vuote e con lunghezza <= 50 caratteri. \\
+\hline
+
+Cognome & Dominio & L’attributo “Cognome” della classe Utente deve contenere solo stringhe di caratteri alfabetici, non vuote e con lunghezza <= 50 caratteri. \\
+\hline
+
+TipoUtente & Dominio & L’attributo "tipoUtente" della classe Utente è un’enumerazione che può assumere solo i valori: chef, studente, chefStudente, per identificare il ruolo dell’utente nel sistema. \\
+\hline
+
+Specializzazione & N‑tupla & Se l’attributo “TipoUtente” è chef o chefStudente, allora l’attributo “Specializzazione” assume un valore alfabetico con lunghezza <= 50. \\
+\hline
+
+Matricola & N‑tupla & Se l’attributo “TipoUtente” è studente o chefStudente, allora l’attributo “Matricola” assume un valore alfanumerico con lunghezza <= 50. \\
+\hline
+
+DataInizio & Dominio & L'attributo "DataInizio" della classe Corso deve essere una data valida nel formato previsto, non può essere nulla. \\
+\hline
+
+Nome & Dominio & L'attributo "Nome" della classe Corso deve contenere una stringa non vuota con solo caratteri alfabetici e lunghezza massima 50 caratteri. \\
+\hline
+
+Categoria & N‑tupla & L'attributo "Categoria" della classe Corso deve contenere almeno una categoria. Ogni elemento deve essere una stringa non vuota. \\
+\hline
+
+Frequenza & Dominio & L'attributo "Frequenza" della classe Corso deve contenere una stringa che rappresenta un intervallo temporale coerente. \\
+\hline
+
+NumPartecipanti & Intrarelazionale & L'attributo "NumPartecipanti" della classe Corso è calcolato automaticamente in base al numero di iscrizioni associate. \\
+\hline
+
+NumSessioni & Dominio & L'attributo "NumSessioni" della classe Sessione deve essere un intero positivo >0. \\
+\hline
+
+OraInizio & Dominio & L'attributo "OraInizio" della classe Sessione deve essere una data valida, non nulla. \\
+\hline
+
+TipoSessione & Dominio & L'attributo "TipoSessione" della classe Sessione è un’enumerazione che può assumere solo i valori: presenza, online. \\
+\hline
+
+Quantità & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "Quantità" assume un valore numerico >0. \\
+\hline
+
+NumAderenti & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "NumAderenti" assume un valore numerico valido >0. \\
+\hline
+
+Teoria & Intrarelazionale & Se l'attributo "TipoSessione" è "online", allora "Teoria" deve essere una stringa alfanumerica con lunghezza <=255. \\
+\hline
+
+Nome & Dominio & L'attributo "Nome" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
+\hline
+
+Descrizione & Dominio & L'attributo "Descrizione" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
+\hline
+
+Tempo & Dominio & L'attributo "Tempo" della classe Ricetta deve contenere una data (ora, minuti, secondi) valida e non vuota. \\
+\hline
+
+Nome & Dominio & L'attributo "Nome" della classe Ingrediente deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
+\hline
+
+UnitàDiMisura & Dominio & L'attributo "UnitàDiMisura" della classe Ingrediente deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
+\hline
+
+\end{longtable}
+\end{center}
