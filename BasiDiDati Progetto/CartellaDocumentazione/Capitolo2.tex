@@ -7,29 +7,103 @@
 \end{figure}
 
 \subsubsection{Descrizione Diagramma ER}
-qua si scrive qualcosa
-
-
+Il diagramma descrive il database per la piattaforma UninFoodLab, includendo la gestione degli utenti, la pianificazione delle sessioni e la logistica degli ingredienti.
+\subsubsection{Gestione Utenti e Gerarchie}
+L'entità padre è Utente, che raccoglie i dati comuni: \textit{Nome},\textit{ Cognome}, \textit{Email} e \textit{Password}. Esiste una generalizzazione che divide l'utente in due ruoli. La doppia linea sotto "Utente" suggerisce una generalizzazione totale, mentre i cerchi con la lettera "O" indicano una specializzazione overlapping:
+\begin{itemize}
+    \item \textbf{Studente}: Identificato da una Matricola;
+    \item \textbf{Chef}: Caratterizzato da una Specializzazione.
+\end{itemize}
+\subsubsection{Corsi e Iscrizioni}
+L'entità centrale dell'offerta formativa è il Corso.
+\begin{itemize}
+    \item Relazione \textbf{Gestisce}: Collega Chef e Corso.
+    \begin{itemize}
+        \item Uno Chef gestisce da 0 a N corsi;
+        \item  Un corso deve essere gestito da almeno 1 chef per esistere (cardinalità 1,N)f.
+    \end{itemize}
+    \item Relazione \textbf{Iscrizione}: Collega Studente e Corso.
+    \begin{itemize}
+        \item È una relazione molti-a-molti con attributi propri: \textit{DataIscrizione} e \textit{Stato};
+        \item Uno studente può avere 0 a N iscrizioni;
+        \item Un corso deve avere almeno 1 iscritto per esistere (cardinalità 1,N).
+    \end{itemize}
+\end{itemize}
+\subsubsection{Struttura delle Sessioni}
+Il corso è strutturato in lezioni tramite la relazione \textbf{Compone}.
+\begin{itemize}
+    \item Cardianalità: Un Corso è composto da 1 a N sessioni , mentre una Sessione appartiene a 1 solo corso;
+    \item Entità Sessione : Ha un attributo OraInizio;
+    \item Gerarchia Sessioni: È presente una generalizzazione Disgiunta (indicata dalla lettera "D" ), il che significa che una sessione è o online o in presenza, mai entrambe:
+    \begin{itemize}
+        \item SessioneOnline: Ha l'attributo specifico \textit{Teoria}.
+        \item SessionePresenza: È l'entità che gestisce la logistica fisica.
+    \end{itemize}
+\end{itemize}
+\subsubsection{Logistica in Presenza (Adesioni e Ricette)}
+Questa parte è specifica per le SessionePresenza:
+\begin{itemize}
+    \item Adesione Studenti: Gli studenti partecipano fisicamente tramite la relazione \textbf{Adesione}, che ha l'attributo \textit{DataAdesione};
+    \begin{itemize}
+        \item La SessionePresenza ha un attributo derivato \textit{NumeroAderenti} per contare i presenti;
+    \end{itemize}
+    \item Preparazione Ricette: La relazione \textbf{Prepara} collega la sessione alle ricette;
+    \begin{itemize}
+        \item Ha un attributo derivato importante: \textit{QuantitàTotale};
+        \item Cardinalità: Una sessione prepara 1 a N ricette , e una ricetta può essere preparata in 1 a N sessioni.
+    \end{itemize}
+\end{itemize}
+\clearpage
 \subsection{Diagramma UML}
-
 \begin{figure}[!h] % [h] = here, posizione suggerita
     \centering
    \includegraphics[width=1.0\textwidth]{CartellaDocumentazione/DiagrammaUML1.pdf}
 \end{figure}
-
-
 \subsubsection{Descrizione Diagramma UML}
-qua si scrive 
+\subsubsection{Tipi di Dato e Precisione Numerica}
+Il diagramma UML definisce esattamente come i dati devono essere memorizzati, sciogliendo le ambiguità generiche dell'ER:
+\begin{itemize}
+\item Gestione delle Quantità: Si nota una distinzione importante tra Int e Double;
+\item Contatori come \textit{numPartecipanti} e \textit{numAderenti} sono Int, poiché contano unità discrete (persone, lezioni);
+\item Le misure fisiche come \textbf{quantitàTotale} e \textbf{quantitàNecessaria}  sono definite come Double. Questo indica che il sistema gestirà valori decimali precisi (es. 1.5 kg, 0.25 litri), dettaglio fondamentale per le ricette che l'ER lasciava implicito.
+\item Date e Orari: i riferimenti temporali sono distinti in base al significato: \textit{dataAdesione} e \textit{dataIscrizione} sono Date, \textit{oraInizio} è un DateTime (data+ora), mentre \textit{tempo} è un Time (ora, minuti, secondi).
+\end{itemize}
+\subsubsection{Rappresentazione degli Array (Attributi Multivalore)}
+L'UML traduce graficamente gli attributi multivalore dell'ER con la notazione delle parentesi quadre:
+\begin{itemize}
+\item +specializzazione[1...*]: String nella classe Chef;
+\item +categoria[1...*]: String nella classe Corso. 
+\end{itemize}
+Questa notazione dice esplicitamente che posso avere più valori.
 \clearpage
 
-
 \subsection{Ristrutturazione Diagramma UML}
-
 \begin{figure}[!h] % [h] = here, posizione suggerita
     \centering
     \includegraphics[width=1.0\textwidth]{CartellaDocumentazione/DiagrammaUMLRistrutt1.pdf}
 \end{figure}
 
 \subsubsection{Descrizione Delle Scelte}
-\subsubsection{Descrizione Accorpamento Entità e Assocazini}
-\subsubsection{Descrizione Eliminazioni delle gerarchie }
+Nel modello iniziale era presente una generalizzazione della classe Utente nelle sottoclassi Studente e Chef. Abbiamo deciso di adottare la seconda strategia, accorpando le due sottoclassi all’interno della classe padre Utente. Questa scelta è motivata dall’assenza di attributi propri nella classe Studente, che avrebbe reso la distinzione strutturale poco significativa. Per mantenere comunque la distinzione dei ruoli, è stato introdotto un attributo discriminante \textit{TipoUtente}.
+
+Analogamente, nel modello iniziale era presente una generalizzazione della classe Sessione nelle sottoclassi SessionePresenza e SessioneOnline. Anche in questo caso è stata adottata la strategia di accorpamento nella classe padre, in quanto la classe SessioneOnline offriva un contributo informativo limitato e non tale da giustificare una modellazione separata. È stato pertanto introdotto un attributo discriminante \textit{TipoSessione}. Questo attributo consente di gestire correttamente la natura disgiunta della generalizzazione e di distinguere in modo chiaro le diverse modalità di erogazione delle sessioni.
+\subsubsection{Accorpamento della gerarchia Utente}
+Invece di avere tre classi distinte (Utente, Chef, Studente), ora esiste una sola classe Utente:
+\begin{itemize}
+    \item Enumerazione come discriminatore: È stata introdotta l'enumerazione TipoUtente che contiene i valori \textbf{chef}, \textbf{studente} e il valore combinato \textbf{chefStudente}. Questo gestisce esplicitamente il caso di Overlapping;
+    \item Fusione degli attributi: La classe Utente contiene ora tutti gli attributi possibili di tutti i ruoli, ma con cardinalità facoltativa:
+    \begin{itemize}
+        \item +\textit{matricola}[0...1]: String: Sarà valorizzata solo se l'utente è uno studente.
+        \item +\textit{specializzazione}[0...*]: String: Sarà valorizzata solo se l'utente è uno chef.
+    \end{itemize}
+\end{itemize}
+\subsubsection{Accorpamento della gerarchia Sessione }
+Analogamente a Utente, la distinzione tra sessioni online e in presenza è stata rimossa strutturalmente per creare un'unica classe Sessione:
+\begin{itemize}
+    \item Enumerazione come discriminatore: È introdotta l'enumerazione TipoSessione che contiene i valori \textit{Presenza} e \textit{Online} per distinguere la natura della lezione.
+    \item Fusione degli attributi: La classe Sessione contiene ora tutti gli attributi che prima erano separati, rendendoli però opzionali:
+    \begin{itemize}
+        \item +\textit{teoria}[0...1]: String: Usato solo se il tipo è online;
+        \item\textit{<<derivate>>numAderenti}[0...1]: Int e \textit{<<derivate>>+quantità}[0...1]: double: Usati solo se il tipo è presenza.
+    \end{itemize}
+\end{itemize}

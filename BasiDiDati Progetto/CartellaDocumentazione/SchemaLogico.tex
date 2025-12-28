@@ -2,8 +2,8 @@
 \subsection{Tabelle}
 Leggenda:
 \begin{itemize}
-    \item Le parole con il \textbf{grassetto} sono indicate tutti i nomi delle tabelle
-    \item Le parole \underline {sottolinete} una volta indicano le chiavi primarie
+    \item Le parole con il {\bfseries grassetto} sono indicate tutti i nomi delle tabelle
+    \item Le parole \underline {sottolineate} una volta indicano le chiavi primarie
     \item Le parole \underline{\underline{sottolinate}} due volte indicano le chiavi esterne
     \item Le parole in \textit{italico} indicano che una chiava primaria è composta da piu attributi 
 \end{itemize}
@@ -12,20 +12,28 @@ Leggenda:
 
 \renewcommand{\arraystretch}{1.80}
 \begin{tabular}{lp{0.7\textwidth}} \hline
-    \textbf{Utente} & email, nome, cognome, password, specializzazione, matricola, tipoUtente, id\_corso\\ 
+    {\bfseries Utente} & \underline {email}, nome, cognome, password, matricola, tipoUtente\\
     \hline
-    \textbf{Corso} & id\_corso, dataInizio, nome, categoria, frequenza, numPartecipanti, id\_sessione \\
+    {\bfseries Corso} & \underline {id\_corso}, dataInizio, nome, frequenza, numPartecipanti, numSessioni\\
     \hline
-    \textbf{Sessione} & id\_sessione, numSessioni, oraInizio, numAderenti, quantità, teoria, TipoSessione, id\_ricetta, id\_corso\\
+    {\bfseries Sessione} & \underline {id\_sessione}, oraInizio, numAderenti, quantità, teoria, TipoSessione, \underline{\underline{id\_corso}}\\
     \hline
-    \textbf{Ricetta} & id\_ricetta, nome, descrizione, tempo, id\_sessione \\
+    {\bfseries Ricetta} & \underline {id\_ricetta}, nome, descrizione, tempo\\
     \hline
-    \textbf{Ingrediente} & nome, unitàDiMisura\\
+    {\bfseries Ingrediente} & \underline {nome}, unitàDiMisura\\
     \hline
-    \textbf{Adesione} & dataAdesione, email,id\_sessione\\
+    {\bfseries Adesione} & dataAdesione, \textit{email, id\_sessione}, \underline{\underline{email}}, \underline{\underline{id\_sessione}}\\
     \hline
-    \textbf{Iscrizione} & dataIscrizione, stato, email,id\_corso\\
+    {\bfseries Iscrizione} & dataIscrizione, stato, \textit{email, id\_corso}, \underline{\underline{email}}, \underline{\underline{id\_corso}}\\
     \hline
-    \textbf{Richiede} & quantitàNecessaria, id\_ricetta, nomeIngrediente \\
+    {\bfseries Richiede} & quantitàNecessaria, \textit{id\_ricetta, nomeIngrediente}, \underline{\underline{id\_ricetta}}, \underline{\underline{nomeIngrediente}}\\
+    \hline
+    {\bfseries Specializzazione\_Chef} & \textit{email\_chef, specializzazione}, \underline{\underline{email\_chef}}\\
+    \hline
+    {\bfseries Categoria\_Corso} & \textit{id\_corso, categoria}, \underline{\underline{id\_corso}}\\
+    \hline
+    {\bfseries Gestisce} & \textit{email\_chef, id\_corso}, \underline{\underline{email\_chef}}, \underline{\underline{id\_corso}}\\
+    \hline
+    {\bfseries Prepara} & \textit{id\_sessione, id\_ricetta}, \underline{\underline{id\_sessione}}, \underline{\underline{id\_ricetta}}\\
     \hline
 \end{tabular}

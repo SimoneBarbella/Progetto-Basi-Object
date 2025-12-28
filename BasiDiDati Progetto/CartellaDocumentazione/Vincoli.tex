@@ -30,7 +30,7 @@ Nome & Dominio & L’attributo “Nome” della classe Utente deve contenere sol
 Cognome & Dominio & L’attributo “Cognome” della classe Utente deve contenere solo stringhe di caratteri alfabetici, non vuote e con lunghezza <= 50 caratteri. \\
 \hline
 
-TipoUtente & Dominio & L’attributo "tipoUtente" della classe Utente è un’enumerazione che può assumere solo i valori: chef, studente, chefStudente, per identificare il ruolo dell’utente nel sistema. \\
+TipoUtente & Dominio & L’attributo "tipoUtente" della classe Utente è un’enumerazione che può assumere solo i valori: chef, studente, chefStudente. \\
 \hline
 
 Specializzazione & N‑tupla & Se l’attributo “TipoUtente” è chef o chefStudente, allora l’attributo “Specializzazione” assume un valore alfabetico con lunghezza <= 50. \\
@@ -54,10 +54,10 @@ Frequenza & Dominio & L'attributo "Frequenza" della classe Corso deve contenere 
 NumPartecipanti & Intrarelazionale & L'attributo "NumPartecipanti" della classe Corso è calcolato automaticamente in base al numero di iscrizioni associate. \\
 \hline
 
-NumSessioni & Dominio & L'attributo "NumSessioni" della classe Sessione deve essere un intero positivo >0. \\
+NumSessioni & Dominio & L'attributo "NumSessioni" della classe Corso deve essere un intero positivo >0. \\
 \hline
 
-OraInizio & Dominio & L'attributo "OraInizio" della classe Sessione deve essere una data valida, non nulla. \\
+OraInizio & Dominio & L'attributo "OraInizio" della classe Sessione deve essere una data valida nel formato previsto, non può essere nulla. \\
 \hline
 
 TipoSessione & Dominio & L'attributo "TipoSessione" della classe Sessione è un’enumerazione che può assumere solo i valori: presenza, online. \\
@@ -66,19 +66,28 @@ TipoSessione & Dominio & L'attributo "TipoSessione" della classe Sessione è un�
 Quantità & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "Quantità" assume un valore numerico >0. \\
 \hline
 
-NumAderenti & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "NumAderenti" assume un valore numerico valido >0. \\
+NumAderenti & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "NumAderenti"  è calcolato automaticamente in base al numero di adesioni associate. \\
 \hline
 
 Teoria & Intrarelazionale & Se l'attributo "TipoSessione" è "online", allora "Teoria" deve essere una stringa alfanumerica con lunghezza <=255. \\
 \hline
 
+Iscrizione & N\-tupla & La relazione "Iscrizione" può coinvolgere solo utenti con tipoUtente = studente o chefStudente. \\
+\hline
+
+Adesione & N\-tupla & La relazione "Adesione" può coinvolgere solo utenti con tipoUtente = studente o chefStudente e solo sessioni con tipoSessione = presenza. \\
+\hline
+
+Prepara & N\-tupla & La relazione "Prepara" può coinvolgere solo sessioni con tipoSessione = presenza. Ogni sessione in presenza prepara almeno una ricetta e ogni ricetta è preparata in almeno una sessione. \\
+\hline
+
 Nome & Dominio & L'attributo "Nome" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
 \hline
 
-Descrizione & Dominio & L'attributo "Descrizione" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
+Descrizione & Dominio & L'attributo "Descrizione" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=250. \\
 \hline
 
-Tempo & Dominio & L'attributo "Tempo" della classe Ricetta deve contenere una data (ora, minuti, secondi) valida e non vuota. \\
+Tempo & Dominio & L'attributo "Tempo" della classe Ricetta deve contenere un orario (ore, minuti, secondi) valido e non nullo. \\
 \hline
 
 Nome & Dominio & L'attributo "Nome" della classe Ingrediente deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
