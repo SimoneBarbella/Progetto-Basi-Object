@@ -1,14 +1,162 @@
-\section{Schema Logico}
-\subsection{Tabelle}
-Leggenda:
-\begin{itemize}
-    \item Le parole con il {\bfseries grassetto} sono indicate tutti i nomi delle tabelle
-    \item Le parole \underline {sottolineate} una volta indicano le chiavi primarie
-    \item Le parole \underline{\underline{sottolinate}} due volte indicano le chiavi esterne
-    \item Le parole in \textit{italico} indicano che una chiava primaria è composta da piu attributi 
-\end{itemize}
 
-\vspace{2em}
+\subsection{Schema Logico}
+Prima di procedere all'implementazione fisica del database, è necessario definire lo schema logico. Tale modello si ottiene traducendo le entità e le associazioni dello schema concettuale in tabelle vere e proprie.\\ Di seguito la notazione utilizzata per la lettura:
+\begin{itemize}
+\item Sottolineatura singola per le chiavi primarie;
+\item Doppia sottolineatura per le chiavi esterne;
+\item Carattere corsivo per le parti costituenti una chiave primaria composta.
+\end{itemize}
+\subsubsection{Traduzione delle classi}
+Dalla trasformazione del diagramma delle classi deriva la seguente organizzazione delle tabelle relazionali:\\
+    \vspace{0.2cm}
+    {\bfseries Utente} (\underline {email}, nome, cognome, password, matricola, tipoUtente)\\
+    \hrule 
+    \vspace{0.2cm}
+    {\bfseries Corso} (\underline {id\_corso}, dataInizio, nome, frequenza, numPartecipanti,   
+    \\numSessioni)\\
+    
+    \hrule
+    \vspace{0.2cm}
+    {\bfseries Sessione} (\underline {id\_sessione}, oraInizio, numAderenti, teoria, \\TipoSessione, \underline{\underline{id\_corso}})\\
+    \colorbox{yellow}{Chiavi esterne: id\_corso $\rightarrow$ Corso.id\_corso}\\
+    
+    \hrule
+    \vspace{0.2cm}
+    {\bfseries Ricetta} (\underline {id\_ricetta}, nome, descrizione, tempo)\\
+    
+    \hrule
+    \vspace{0.2cm}
+    {\bfseries Ingrediente} (\underline{nome}, unitàDiMisura)\\
+    
+    \hrule
+    \vspace{0.2cm}
+    {\bfseries Adesione} (dataAdesione, \textit{email, id\_sessione}, \underline{\underline{email}}, \underline{\underline{id\_sessione}})\\
+    \colorbox{yellow}{%
+    \begin{minipage}{0.7\textwidth}
+    Chiavi esterne: id\_sessione $\rightarrow$ Sessione.id\_sessione \\
+     \space email $\rightarrow$ Utente.email
+  \end{minipage}%
+   }\\
+   
+   \hrule
+   \vspace{0.2cm}
+    {\bfseries Iscrizione} (dataIscrizione, stato, \textit{email, id\_corso}, \underline{\underline{email}}, \underline{\underline{id\_corso}})\\
+    \colorbox{yellow}{%
+    \begin{minipage}{0.7\textwidth}
+    Chiavi esterne: id\_corso $\rightarrow$ Corso.id\_corso \\
+     \space email $\rightarrow$ Utente.email
+  \end{minipage}%
+   }\\
+   
+   \hrule
+   \vspace{0.2cm}
+    {\bfseries Richiede} (\textit{id\_ricetta}, \textit{nomeIngrediente}, \underline{\underline{id\_ricetta}}, \underline{\underline{nomeIngrediente}}, \\quantitàNecessaria)\\
+    \colorbox{yellow}{%
+    \begin{minipage}{0.7\textwidth}
+    Chiavi esterne: id\_ricetta $\rightarrow$ Ricetta.id\_ricetta \\
+     \space nomeIngrediente $\rightarrow$ Ingrediente.nome
+  \end{minipage}%
+   }\\
+   
+   \hrule
+   \vspace{0.2cm}
+    {\bfseries Specializzazione\_Chef} (\textit{email\_chef, specializzazione}, \underline{\underline{email\_chef}})\\
+    \colorbox{yellow}{Chiave esterna: email\_chef $\rightarrow$ Utente.email}\\
+    
+    \hrule
+    \vspace{0.2cm}
+    {\bfseries Categoria\_Corso} (\textit{id\_corso, categoria}, \underline{\underline{id\_corso}})\\
+     \colorbox{yellow}{Chiave esterna: id\_corso $\rightarrow$ Corso.id\_corso}\\
+     
+     \hrule
+     \vspace{0.2cm}
+    {\bfseries Gestisce} (\textit{email\_chef, id\_corso}, \underline{\underline{email\_chef}}, \underline{\underline{id\_corso}})\\
+    \colorbox{yellow}{%
+    \begin{minipage}{0.6\textwidth}
+    Chiavi esterne: id\_corso $\rightarrow$ Corso.id\_corso \\
+     \space email\_chef $\rightarrow$ Utente.email
+  \end{minipage}%
+   }\\
+   
+   \hrule
+   \vspace{0.2cm}
+    {\bfseries Prepara} (\textit{id\_sessione, id\_ricetta}, \underline{\underline{id\_sessione}}, \underline{\underline{id\_ricetta}})\\
+    \colorbox{yellow}{%
+    \begin{minipage}{0.7\textwidth}
+    Chiavi esterne: id\_ricetta $\rightarrow$ Ricetta.id\_ricetta \\
+     \space id\_sessione $\rightarrow$ Sessione.id\_sessione
+  \end{minipage}%
+   }\\
+   \hrule
+   \vspace{0.2cm}
+    {\bfseries Vista\_Fabbisogni\_Sessione} (\textit{id\_sessione, nomeIngrediente}, \underline{\underline{id\_sessione}}, \underline{\underline{nomengrediente}}, quantitàTotale)\\
+    \colorbox{yellow}{%
+    \begin{minipage}{0.7\textwidth}
+    Chiavi esterne: nomeIngrediente $\rightarrow$ Ingrediente.nome \\
+     \space id\_sessione $\rightarrow$ Sessione.id\_sessione
+  \end{minipage}%
+   }\\
+\clearpage
+\subsubsection{Traduzione delle associazioni}
+\begin{table}[H] 
+\label{tab:traduzione_associazioni} 
+\centering
+\renewcommand{\arraystretch}{1.2} 
+\begin{tabular}{|>{\centering\arraybackslash}m{0.30\textwidth}|>{\raggedright\arraybackslash}m{0.65\textwidth}|}
+\hline
+    \textbf{Associazione} & \textbf{Implementazione} \\
+    \hline
+
+    \textbf{adesione} \newline \textit{(Utente - Adesione)} & 
+    \textbf{Importazione Chiave Esterna:} L'entità \textit{Adesione} (lato N) importa la chiave primaria di \textit{Utente} (\texttt{id\_utente}) come chiave esterna. \\
+    \hline
+
+    \textbf{iscrizione} \newline \textit{(Utente - Iscrizione)} & 
+    \textbf{Importazione Chiave Esterna:} L'entità \textit{Iscrizione} importa la chiave primaria di \textit{Utente} (\texttt{id\_utente}) come chiave esterna. \\
+    \hline
+
+    \textbf{gestisce} \newline \textit{(Chef - Corso)} & 
+    \textbf{Importazione Chiave Esterna:} Data la cardinalità 1:N, la tabella \textit{Corso} ospita la chiave esterna dello \textit{Chef} (\texttt{id\_chef}). \\
+    \hline
+
+    \textbf{compone} \newline \textit{(Corso - Sessione)} & 
+    \textbf{Importazione Chiave Esterna:} La tabella \textit{Sessione} importa la chiave primaria di \textit{Corso} (\texttt{id\_corso}) come chiave esterna. \\
+    \hline  
+
+    \textbf{prepara} \newline \textit{(Sessione - Ricetta)} & 
+    \textbf{Nuova Tabella (Ponte):} Data la cardinalità Molti-a-Molti, si crea la tabella di raccordo \textit{Prepara} composta dalle chiavi esterne delle due entità (\texttt{id\_sessione}, \texttt{id\_ricetta}). \\
+    \hline
+
+    \textbf{haBisogno} \newline \textit{(Ricetta - Richiede)} & 
+    \textbf{Importazione Chiave Esterna:} La tabella \textit{Richiede} importa la chiave primaria della \textit{Ricetta} (\texttt{id\_ricetta}). \\
+    \hline
+
+    \textbf{necessita} \newline \textit{(Richiede - Ingrediente)} & 
+    \textbf{Importazione Chiave Esterna:} La tabella \textit{Richiede} importa la chiave primaria dell'\textit{Ingrediente} (\texttt{id\_ingrediente}). \\
+    \hline
+
+    \textbf{per} \newline \textit{(Adesione - Sessione)} & 
+    \textbf{Importazione Chiave Esterna:} La tabella \textit{Adesione} importa la chiave primaria della \textit{Sessione} (\texttt{id\_sessione}). \\
+    \hline
+
+    \textbf{relativa} \newline \textit{(Iscrizione - Corso)} & 
+    \textbf{Importazione Chiave Esterna:} La tabella \textit{Iscrizione} importa la chiave primaria del \textit{Corso} (\texttt{id\_corso}). \\
+    \hline 
+
+    \textbf{specializzatoIn} \newline \textit{(Chef - Specializzazione)} & 
+    \textbf{Nuova Tabella:} La tabella \textit{Specializzazione\_Chef} viene creata per gestire l'attributo multivalore, importando la chiave primaria dello chef (\texttt{email\_chef}). \\
+    \hline
+
+    \textbf{categorizzatoIn} \newline \textit{(Corso - Categoria)} & 
+    \textbf{Nuova Tabella:} La tabella \textit{Categoria\_Corso} viene creata per gestire l'attributo multivalore, importando la chiave primaria del corso (\texttt{id\_corso}). \\
+    \hline
+
+\end{tabular}
+\end{table}
+   
+   \clearpage
+\subsubsection{Schema logico finale}
+Di seguito viene riportato lo schema logico finale risultante, completo di chiavi primarie, esterne e attributi:\\
 
 \renewcommand{\arraystretch}{1.80}
 \begin{tabular}{lp{0.7\textwidth}} \hline
@@ -16,7 +164,7 @@ Leggenda:
     \hline
     {\bfseries Corso} & \underline {id\_corso}, dataInizio, nome, frequenza, numPartecipanti, numSessioni\\
     \hline
-    {\bfseries Sessione} & \underline {id\_sessione}, oraInizio, numAderenti, quantità, teoria, TipoSessione, \underline{\underline{id\_corso}}\\
+    {\bfseries Sessione} & \underline {id\_sessione}, oraInizio, numAderenti, teoria, TipoSessione, \underline{\underline{id\_corso}}\\
     \hline
     {\bfseries Ricetta} & \underline {id\_ricetta}, nome, descrizione, tempo\\
     \hline
@@ -36,4 +184,7 @@ Leggenda:
     \hline
     {\bfseries Prepara} & \textit{id\_sessione, id\_ricetta}, \underline{\underline{id\_sessione}}, \underline{\underline{id\_ricetta}}\\
     \hline
+    {\bfseries Vista\_Fabbisogni\_Sessione} &\textit{id\_sessione}, \textit{nomeIngrediente}, \underline{\underline{id\_sessione}}, \underline{\underline{nomengrediente}}, quantitàTotale\\
+    \hline
 \end{tabular}
+

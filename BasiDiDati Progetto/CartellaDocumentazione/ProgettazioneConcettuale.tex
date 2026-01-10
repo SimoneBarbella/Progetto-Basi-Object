@@ -1,0 +1,138 @@
+\section{Progettazione Concettuale}
+\subsection{Diagramma ER}
+
+\begin{figure}[!h] % [h] = here, posizione suggerita
+    \centering
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/diagrammi/DiagrammaER1.pdf}
+\end{figure}
+
+\subsubsection{Descrizione Diagramma ER}
+Il diagramma Entità-Relazione (ER) proposto definisce l'architettura informativa della piattaforma UninFoodLab, progettata per digitalizzare i processi di un laboratorio culinario accademico. Il modello garantisce l'integrità referenziale e supporta le regole di business attraverso una struttura modulare.\\
+La descrizione del diagramma è articolata nelle seguenti sei aree tematiche, che riflettono la logica sequenziale dei processi gestiti:
+\begin{enumerate}
+    \item \textbf{Gestione Utenti e Gerarchie}: Definisce gli attori del sistema, implementando la specializzazione dei ruoli tra corpo docente (Chef) e discenti (Studenti);
+    \item \textbf{Corsi e Iscrizioni}: Modella l'offerta formativa e le relazioni di titolarità e fruizione, gestendo il ciclo di vita delle iscrizioni;
+    \item \textbf{Struttura delle Sessioni}: Dettaglia la scomposizione temporale dei corsi, introducendo la distinzione strutturale tra didattica online (teorica) e in presenza (pratica);
+    \item \textbf{Logistica in Presenza}: Approfondisce le dinamiche operative del laboratorio fisico, regolando i flussi di prenotazione degli studenti (Adesioni) e il calcolo puntuale dei fabbisogni di materie prime necessari per lo svolgimento della lezione;
+    \item \textbf{Scelta delle Chiavi Primarie}: Esplicita le decisioni progettuali riguardanti l'adozione di identificatori naturali per garantire una maggiore aderenza semantica al dominio applicativo
+\end{enumerate}
+\subsubsection{Gestione Utenti e Gerarchie}
+Il nucleo della gestione degli accessi e delle anagrafiche è rappresentato dall'entità padre \textbf{Utente}. Questa entità fattorizza le informazioni comuni a tutti gli attori del sistema, evitando ridondanze.
+\begin{itemize}
+    \item \textbf{Attributi Comuni}: Ogni utente è definito da \textit{Nome}, \textit{Cognome}, \textit{Email} e \textit{Password};
+    \item \textbf{Gerarchia di Generalizzazione}: Il modello adotta una struttura gerarchica per gestire i ruoli. La relazione padre-figlio è definita dalle seguenti proprietà vincolanti:
+    \begin{itemize}
+        \item \textbf{Totale}: Indica che l'unione delle entità figlie copre l'intera popolazione dell'entità padre. In termini operativi, non può esistere un "Utente generico" nel sistema; ogni account registrato deve necessariamente appartenere ad almeno una delle categorie specifiche (\textbf{Studente} o \textbf{Chef});
+        \item \textbf{Overlapping} (Cerchio con "O"): Questa configurazione permette la sovrapposizione dei ruoli. Un singolo utente può esistere simultaneamente sia come \textbf{Studente} che come \textbf{Chef} (configurando il ruolo ibrido di "\textbf{ChefStudente}"). Questa scelta garantisce flessibilità, permettendo ad esempio a uno chef di iscriversi a corsi tenuti da colleghi per aggiornamento professionale.
+    \end{itemize}
+    \item Le entità figlie estendono il padre con attributi specifici:
+    \begin{itemize}
+        \item \textbf{Studente}: Identificato univocamente nel contesto accademico dalla \textit{matricola};
+        \item \textbf{Chef}: Qualificato professionalmente dall'attributo \textit{specializzazione}.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Corsi e Iscrizioni}
+L'entità \textbf{Corso} rappresenta l'unità centrale dell'offerta didattica, fungendo da aggregatore per \textbf{Chef}e \textbf{Studente}. La sua esistenza è regolata da due relazioni fondamentali che definiscono, rispettivamente, la titolarità dell'insegnamento e la fruizione del servizio.
+\begin{itemize}
+    \item Relazione \textbf{Gestisce} (Titolarità del Corso): Questa associazione collega l'entità \textbf{Chef} a \textbf{Corso}:
+    \begin{itemize}
+        \item \textbf{Chef → Corso (0..N) }: Uno \textbf{Chef} può non avere corsi attivi in un determinato momento (0) oppure gestirne molteplici contemporaneamente (N);
+        \item \textbf{Corso → Chef (1..N) - Vincolo di Esistenza)}: Un \textbf{Corso}, per essere creato e mantenuto nel sistema, necessita obbligatoriamente di un responsabile. Il vincolo minimo "1" impedisce la presenza di "corsi orfani" senza docente, garantendo la qualità dell'offerta.
+    \end{itemize}
+    \item Relazione \textbf{Iscrizione} (Fruizione Didattica): Collega l'entità \textbf{Studente} a \textbf{Corso}. Trattandosi di una relazione \textbf{Molti-a-Molti}, essa evolve in una tabella associativa dotata di attributi propri che storicizzano il legame:
+    \begin{itemize}
+        \item Attributi della relazione:
+        \begin{itemize}
+            \item \textit{dataIscrizione}: Traccia temporalmente il momento dell'ingresso dello studente nel corso;
+            \item \textit{stato}: Definisce la fase corrente del percorso (es. Attivo, Completato, Ritirato), permettendo di monitorare il progresso accademico.
+        \end{itemize}
+        \item Cardinalità della relazione:
+        \begin{itemize}
+            \item \textbf{Studente → Iscrizione (0..N)}: Uno \textbf{Studente} registrato può non essere iscritto a nessun corso (0) o seguirne diversi in parallelo (N).
+             \item \textbf{Corso → Iscrizione (1..N) - Vincolo di Attivazione)}: Similmente alla gestione degli \textbf{Chef}, il modello impone che un corso esista solo se vi è una platea di destinatari. Un corso con 0 iscritti non è contemplato operativamente come istanza attiva nel sistema.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\subsubsection{Struttura delle Sessioni}
+Il \textbf{Corso} non è un'entità monolitica, ma viene declinato in unità didattiche temporali attraverso la relazione \textbf{Compone}. Questa associazione definisce la scomposizione modulare del percorso formativo in singole lezioni, permettendo una pianificazione granulare del calendario accademico.
+\begin{itemize}
+    \item \textbf{Relazione Compone} (Vincoli di Struttura): La relazione lega l'offerta formativa alla sua erogazione pratica. Le cardinalità imposte garantiscono la consistenza strutturale:
+    \begin{itemize}
+        \item \textbf{Corso → Sessioni (1..N)}: Un corso non può esistere come "scatola vuota"; affinché sia valido, deve essere composto da almeno una sessione pianificata;
+        \item \textbf{Sessione → Corso (1..1}): Ogni sessione è strettamente dipendente dal corso di appartenenza. Non esistono sessioni "libere" o condivise tra più corsi; ogni lezione è un'istanza esclusiva del percorso formativo di riferimento.
+    \end{itemize}
+    \item \textbf{Entità Sessione} (Unità Atomica): La Sessione rappresenta l'unità base di erogazione del servizio didattico.
+    \begin{itemize}
+        \item Attributo \textit{oraInizio}: Fondamentale per la calendarizzazione, questo attributo temporale definisce il collocamento cronologico della lezione, permettendo la gestione degli orari.
+    \end{itemize}
+    \item \textbf{Gerarchia delle Sessioni} (Generalizzazione): Per gestire la natura ibrida della didattica, è stata modellata una gerarchia. Si tratta di una generalizzazione \textbf{Totale} e \textbf{Disgiunta} (cerchio con "D"):
+    \begin{itemize}
+        \item \textbf{Disgiunta}: Impone una mutua esclusività rigida. Un'istanza di \textbf{sessione} non può possedere simultaneamente le caratteristiche di una lezione online e di una in presenza. Lo stato è binario: o la lezione avviene da remoto, o avviene in laboratorio.
+    \end{itemize}
+    La gerarchia si dirama nelle seguenti entità figlie:
+    \begin{itemize}
+        \item \textbf{SessioneOnline}: Rappresenta le lezioni erogate tramite piattaforme digitali.
+        \begin{itemize}
+            \item Attributo \textit{teoria}: Questo attributo specifico qualifica il contenuto della lezione (es. link alla piattaforma, argomento teorico trattato), focalizzandosi esclusivamente sulla componente concettuale e nozionistica, svincolata dalle necessità logistiche fisiche.
+        \end{itemize}
+        \item \textbf{SessionePresenza} (Laboratorio Fisico): Rappresenta le lezioni pratiche svolte all'interno delle strutture dell'istituto.
+        \begin{itemize}
+            \item Questa entità funge da snodo cruciale per l'intera gestione logistica (descritta nella sezione successiva), poiché è l'unico punto del sistema che abilita le associazioni con gli ingredienti, le ricette e la presenza fisica degli studenti.
+            \item Attributo Derivato Multivalore (\textit{quantitàTotale}): A livello concettuale, è stato definito l’attributo \textit{quantitàTotale} per rappresentare il fabbisogno complessivo di materie prime. Esso è classificato come multivalore (in quanto riferito a una lista eterogenea di ingredienti) e derivabile (rappresentato graficamente con linea tratteggiata).
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Logistica in Presenza (Adesioni e Fabbisogni)}
+Questa porzione del diagramma modella le dinamiche operative che avvengono fisicamente all’interno del laboratorio, distinguendo le attività pratiche dal semplice apprendimento teorico. Qui vengono gestiti i flussi di prenotazione degli studenti e la definizione puntuale delle materie prime necessarie.
+\begin{itemize}
+    \item \textbf{Adesione degli Studenti}: A differenza della generica iscrizione al \textbf{Corso}, la relazione \textbf{Adesione} rappresenta la prenotazione puntuale di uno studente a una specifica lezione pratica (\textbf{SessionePresenza}).
+    \begin{itemize}
+        \item Attributo \textit{dataAdesione}: Registra il momento esatto della prenotazione, fondamentale per gestire priorità o scadenze temporali per la partecipazione;
+        \item Attributo Derivato \textit{numAderenti}: La SessionePresenza include questo attributo calcolato, che conta dinamicamente le istanze nella relazione \textbf{Adesione} associate a quella \textbf{sessione}.
+    \end{itemize}
+    \item \textbf{Definizione dei Fabbisogni (Relazione Richiede)}: La relazione \textbf{Richiede} costituisce la distinta base tecnica del laboratorio, collegando ogni \textbf{Ricetta} ai singoli \textbf{Ingredienti} necessari per la sua realizzazione. Questa associazione è fondamentale per tradurre un piatto in una lista di spesa.
+    \begin{itemize}
+        \item Attributo \textit{quantitàNecessaria}: Rappresenta la dose unitaria effettiva dell'ingrediente per la specifica ricetta . Questo attributo è il moltiplicatore base che, incrociato successivamente con il numero di aderenti alla sessione, permetterà al sistema di calcolare la \textit{quantitàTotale} (attributo derivato multivalore).
+        \item \textbf{Analisi delle Cardinalità (Vincoli di Struttura)}: Le cardinalità imposte sulla relazione \textbf{Richiede }garantiscono la consistenza delle schede tecniche:
+        \begin{itemize}
+            \item \textbf{Ricetta → Ingredienti (1..N)}: Una \textbf{ricetta }non può esistere come entità astratta priva di componenti; affinché sia valida e "cucinabile", deve essere composta da almeno un \textbf{ingrediente};
+            \item \textbf{Ingrediente → Ricette (0..N)}: Un \textbf{ingrediente }catalogato in magazzino (es. una spezia rara) potrebbe momentaneamente non essere utilizzato in nessuna delle ricette attive nel menu corrente (cardinalità minima 0), ma può potenzialmente comparire in infinite preparazioni diverse (cardinalità massima N).
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\subsubsection{Scelta delle Chiavi Primarie (Identificatori Naturali)}
+Nel progettare lo schema, si è scelto di utilizzare, ove possibile, \textbf{chiavi naturali} (proprietà inerenti all'entità) anziché chiavi surrogate, al fine di mantenere una forte coerenza concettuale con il dominio applicativo.
+\begin{itemize}
+    \item \textbf{Email (Entità Utente)}: È stata selezionata l'attributo \textit{email} come chiave primaria per l'entità \textbf{Utente}. Nel contesto di una piattaforma web, l'indirizzo email costituisce un identificatore univoco globale che garantisce l'assenza di duplicati per la stessa persona fisica. Questa scelta ottimizza anche il processo di autenticazione, poiché l'email funge sia da identificativo di accesso che da chiave di vincolo nel database;
+    \item \textbf{Nome (Entità Ingrediente)}: Per l'entità \textbf{Ingrediente}, si è scelto l'attributo \textit{nome} come chiave primaria. Si assume che nel dominio di riferimento (la dispensa del laboratorio) ogni ingrediente sia catalogato con una nomenclatura univoca (es. "Farina", "Zucchero a velo"). L'uso del nome come chiave evita ridondanze e semplifica le interrogazioni, rendendo le associazioni immediatamente leggibili senza necessità di operazioni di join per recuperare la descrizione dell'ingrediente.
+\end{itemize}
+\clearpage
+\subsection{Diagramma UML}
+\begin{figure}[!h] % [h] = here, posizione suggerita
+    \centering
+   \includegraphics[width=1.0\textwidth]{CartellaDocumentazione/diagrammi/DiagrammaUML1.pdf}
+\end{figure}
+\subsubsection{Descrizione Diagramma UML}
+\subsubsection{Tipi di Dato e Precisione Numerica}
+Il diagramma UML definisce esattamente come i dati devono essere memorizzati, sciogliendo le ambiguità generiche dell'ER:
+\begin{itemize}
+\item \textbf{Gestione delle Quantità}: Si nota una distinzione importante tra Integer e Decimal;
+\item Contatori come \textit{numPartecipanti} e \textit{numAderenti} sono Int, poiché contano unità discrete (persone, lezioni);
+\item Le misure fisiche come \textit{quantitàTotale} e \textit{quantitàNecessaria}  sono definite come Decimal. Questo indica che il sistema gestirà valori decimali precisi (es. 1.5 kg, 0.25 litri), dettaglio fondamentale per le ricette che l'ER lasciava implicito.
+\item \textbf{Date e Orari}: i riferimenti temporali sono distinti in base al significato: \textit{dataAdesione} e \textit{dataIscrizione} sono Date, \textit{oraInizio} è un DateTime (data+ora), mentre \textit{tempo} è un Time (ora, minuti, secondi).
+\end{itemize}
+\subsubsection{Rappresentazione degli Array (Attributi Multivalore)}
+L’UML traduce graficamente gli attributi multivalore dell’ER con la notazione delle parentesi quadre: 
+\begin{itemize}
+    \item +\textit{specializzazione}[1...*]: String nella classe \textbf{Chef};
+    \item +\textit{categoria}[1...*]: String nella classe \textbf{Corso}.
+\end{itemize}
+Questa notazione dice esplicitamente che posso avere più valori.\\
+Un caso particolare è l'attributo della logistica: \textit{«derivate» quantitàTotale}[1...*]: nella classe \textbf{SessionePresenza}. In questo caso, la notazione evidenzia due aspetti:
+\begin{itemize}
+    \item Lo stereotipo «derivate»: indica che il dato non viene memorizzato, ma è calcolato dinamicamente dal sistema (aggregando le ricette).
+    \item Le parentesi [1...*]: specificano che il risultato del calcolo non è un valore unico, ma una lista di ingredienti e quantità.
+\end{itemize}
+\clearpage

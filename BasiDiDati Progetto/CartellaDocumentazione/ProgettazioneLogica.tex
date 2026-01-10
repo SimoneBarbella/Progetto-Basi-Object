@@ -1,0 +1,74 @@
+\section{Progettazione Logica}
+\subsection{Ristrutturazione Diagramma UML}
+\begin{figure}[!h] % [h] = here, posizione suggerita
+    \centering
+    \includegraphics[width=1.0\textwidth]{CartellaDocumentazione/diagrammi/DiagrammaUMLRistrutt1.pdf}
+\end{figure}
+
+\subsubsection{Descrizione Delle Scelte}
+Nel passaggio dal modello concettuale a quello logico, si è scelto di semplificare la struttura delle gerarchie ereditarie adottando la strategia dell'accorpare nella classe genitore. Questa decisione mira a ridurre la complessità dello schema e a ottimizzare le prestazioni, evitando join eccessivi per recuperare informazioni su entità strettamente correlate.
+\subsubsection{Accorpamento della gerarchia Utente}
+Nel modello iniziale, l'entità \textbf{Utente} si specializzava nelle sottoclassi \textbf{Studente} e \textbf{Chef}. L'analisi ha evidenziato che la sottoclasse \textbf{Studente} possedeva un set di attributi propri molto ridotto, rendendo una separazione strutturale su tabelle distinte poco efficiente. Si è proceduto quindi alla fusione in un'unica entità \textbf{Utente}, gestendo le specificità tramite le seguenti modifiche:
+\begin{itemize}
+    \item \textbf{Attributo Discriminante (Enum)}: È stato introdotto il campo \textit{TipoUtente} basato su un'enumerazione. I valori previsti sono \textit{chef}, \textit{studente} e \textit{chefStudente}. Quest'ultimo valore è cruciale per implementare logicamente la generalizzazione overlapping, permettendo al sistema di identificare gli utenti che ricoprono entrambi i ruoli senza duplicare i record.
+    \item Gestione degli Attributi Specifici:
+    \begin{itemize}
+        \item \textit{matricola} [0..1]: L'attributo scalare è stato integrato nella tabella \textbf{Utente} con vincolo di nullabilità (nullable). Sarà valorizzato esclusivamente se il \textit{TipoUtente} include il ruolo di \textit{studente} o \textit{chefStudente};
+        \item 
+        \textit{specializzazione} (Esternalizzazione): A differenza dell'attributo \textit{matricola}, l'attributo \textit{specializzazione} presentava una cardinalità multivalore (uno \textbf{Chef} può avere più competenze). Per rispettare la giusta gestione degli attributi multivalori, non è stato accorpato nell'entità \textbf{Utente}, ma è stato promosso a relazione indipendente (tabella \textbf{Specializzazione\_Chef}), collegata all'utente tramite chiave esterna.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Accorpamento della gerarchia Sessione }
+Analogamente, la generalizzazione tra \textbf{SessioneOnline} e \textbf{SessionePresenza} è stata risolta accorpando le sottoclassi nell'entità padre \textbf{Sessione}. La scarsa complessità informativa della classe \textbf{SessioneOnline} non giustificava il mantenimento di una tabella dedicata.
+\begin{itemize}
+    \item \textbf{Attributo Discriminante (Enum)}: È stato introdotto il campo TipoSessione con i valori \textit{online }e \textit{presenza}. Poiché la generalizzazione originale era disgiunta, questo attributo assume un valore mutuamente esclusivo.
+    \item \textbf{Integrazione degli Attributi Condizionali}: La tabella unica \textbf{Sessione} accoglie ora l'unione degli attributi delle sottoclassi originali, resi opzionali per garantirne la coerenza semantica:
+    \begin{itemize}
+        \item \textit{teoria }[0..1]: Attributo testuale valorizzato solo se l'attributo discriminante \textit{TipoSessione} è \textit{online};
+        \item \textbf{Attributi Logistici (\textit{numAderenti}, \textit{quantitàTotale})}: Questi attributi sono pertinenti e validi esclusivamente se l'attributo discriminante \textit{TipoSessione} è \textit{presenza}. In caso di sessione online, tali campi restano nulli o non calcolabili, riflettendo l'assenza di logistica fisica.
+    \end{itemize}
+\end{itemize}
+\subsubsection{Gestione degli Attributi Multivalore (Normalizzazione)}
+Durante la fase di traduzione dal modello concettuale al modello logico relazionale, è stata posta particolare attenzione alla gestione degli attributi definiti come \textbf{multivalore}. Il modello relazionale impone il rispetto della \textbf{Prima Forma Normale (1FN)}, la quale prescrive l'atomicità dei valori: ogni cella di una tabella deve contenere un singolo valore e non sono ammessi gruppi ripetitivi o array.\\
+Per risolvere questa discrepanza strutturale, si è proceduto alla promozione degli attributi multivalore, trasformandoli in relazioni (tabelle) distinte collegate all'entità principale tramite vincoli di chiave esterna.
+\begin{enumerate}
+    \item \textbf{Esternalizzazione delle Specializzazioni Chef}\\
+Nel modello concettuale, l'entità \textbf{Chef} possedeva l'attributo \textit{specializzazione} con cardinalità [1..N], indicando che un docente può possedere competenze multiple. L'integrazione di questo dato direttamente nella tabella \textbf{Utente} avrebbe generato una ridondanza dei dati anagrafici (ripetendo le informazioni dell'utente per ogni specializzazione) o la creazione di campi non atomici, compromettendo l'integrità del database e violando la Prima Forma Normale. Quindi si è optato per la creazione della tabella dedicata \textbf{Specializzazione\_Chef}, composta dalla coppia di attributi  (\textit{email\_chef, specializzazione}) e avente una chiave primaria composta da entrambi gli attributi, garantendo che non ci siano duplicati della stessa competenza per lo stesso chef.
+    \item \textbf{Esternalizzazione delle Categorie Corso}\\
+Analogamente, l'attributo \textit{categoria} associato all'entità \textbf{Corso} è stato identificato come multivalore (un corso può appartenere a più aree tematiche simultaneamente, es. "Primi Piatti" e "Tradizione Romana"), perciò è stata introdotta la tabella di collegamento \textbf{Categoria\_Corso}, composta dalla coppia di attributi (\textit{id\_corso}, \textit{categoria}) e avente una chiave primaria composta da entrambi gli attributi.\\
+Questa struttura permette una classificazione flessibile dell'offerta formativa, consentendo ricerche filtrate per categoria senza appesantire la tabella principale Corso con campi testuali ridondanti.
+\end{enumerate}
+\subsubsection{Gestione dell'attributo derivato multivalore quantitàTotale}
+Nella fase di ristrutturazione del diagramma per il passaggio al modello logico-relazionale, è stata posta particolare attenzione all'attributo \textit{quantitàTotale}, definito nel modello concettuale come derivato e multivalore. La traduzione diretta di tale attributo all'interno della tabella \textbf{Sessione} avrebbe comportato due gravi violazioni delle forme normali:
+\begin{itemize}
+    \item \textbf{Violazione della 1FN (Atomicità)}: Trattandosi di un attributo multivalore (una lista di ingredienti diversi per ogni sessione), non può essere memorizzato in un'unica cella atomica.
+    \item \textbf{Ridondanza e Rischio di Inconsistenza}: Memorizzare un valore calcolato (il totale) che dipende da altri dati già presenti nel database (\textit{quantitàNecessaria} in \textbf{Richiede} e \textit{numAderenti} in \textbf{Adesione}) introdurrebbe una ridondanza. Se una dose venisse modificata, il totale memorizzato diventerebbe obsoleto (anomalia di aggiornamento).
+\end{itemize}
+Quindi si è optato all'utilizzo di una \textbf{Vista Logica (VIEW}).\\
+Per risolvere queste criticità mantenendo l'accesso agevole al dato aggregato, l'attributo è stato rimosso dallo schema fisico delle tabelle ed è stato implementato tramite una Vista SQL (Virtual Relation).La vista, denominata \textbf{Vista\_Fabbisogni\_Sessione}, non memorizza fisicamente i dati, ma esegue una query di aggregazione a runtime che incrocia le seguenti entità:
+\begin{itemize}
+    \item \textbf{Sessione}: Fornisce il moltiplicatore (\textit{NumAderenti}).
+    \item \textbf{Prepara (Tabella di collegamento Sessione-Ricetta)}: Funge da filtro, identificando quali ricette sono effettivamente previste per quella specifica sessione. Senza questa tabella ponte, sarebbe impossibile sapere quale "lista ingredienti" attivare per la lezione.
+    \item \textbf{Richiede}: Fornisce la dose unitaria (\textit{quantitàNecessaria}) per ogni ingrediente della ricetta selezionata.
+\end{itemize}
+
+
+
+
+
+\subsubsection{Adozione delle Chiavi Surrogate (Identificativi Artificiali)}
+Mentre per le entità anagrafiche e stabili (come \textbf{Utente} e \textbf{Ingrediente}) si è optato per chiavi naturali, per le entità associative e di gestione eventi si è ritenuto necessario introdurre \textbf{chiavi surrogate} (o artificiali). Tali chiavi sono costituite da codici numerici autoincrementali privi di significato semantico intrinseco.\\
+La scelta di utilizzare identificativi artificiali per entità come \textbf{Corso}, \textbf{Sessione} e \textbf{Ricetta} è motivata da tre criteri progettuali fondamentali:
+\begin{enumerate}
+    \item \textbf{Stabilità e Indipendenza Semantica}\\
+    Una Chiave Primaria deve soddisfare il requisito di immutabilità. Utilizzare attributi descrittivi (come il "Titolo del Corso" o il "Nome della Ricetta") come chiave primaria esporrebbe il database a gravi problemi di integrità referenziale nel caso in cui tali nomi dovessero subire modifiche o correzioni.
+    \item \textbf{Efficienza nelle Operazioni di Join}\\
+    Dal punto di vista delle prestazioni, i database relazionali gestiscono i confronti tra numeri interi (INTEGER) in modo significativamente più rapido rispetto al confronto tra stringhe di testo (VARCHAR). Poiché le tabelle operative (come \textbf{Iscrizione} o \textbf{Richiede}) contengono migliaia di record che fanno riferimento ai corsi e agli ingredienti, l'uso di chiavi intere riduce la dimensione degli indici e velocizza le operazioni di JOIN.
+    \item \textbf{Semplificazione delle Chiavi Esterne}\\
+    Per alcune entità deboli o dipendenti, l'uso di chiavi naturali avrebbe richiesto la creazione di chiavi composte complesse. Esempio:
+    \begin{itemize}
+        \item  \textbf{Sessione}: Senza una chiave surrogata, per identificare univocamente una sessione sarebbe stato necessario combinare \textit{id\_corso} +  \textit{OraInizio}. Utilizzando un semplice \textit{id\_sessione} univoco, si semplifica drasticamente la struttura delle tabelle associative (come \textbf{Adesione} e \textbf{Prepara}), che necessitano di importare una sola colonna numerica come chiave esterna anziché due.
+    \end{itemize}
+\end{enumerate}
+

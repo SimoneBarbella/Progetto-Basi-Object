@@ -6,7 +6,6 @@
 \begin{longtable}{|>{\centering\arraybackslash}m{0.30\textwidth}|
                   >{\centering\arraybackslash}m{0.22\textwidth}|
                   >{\raggedright\arraybackslash}m{0.45\textwidth}|}
-\caption{Dizionario dei vincoli} \label{tab:vincoli} \\
 
 \hline
 \textbf{Vincolo} & \textbf{Tipo} & \textbf{Descrizione} \\
@@ -15,86 +14,92 @@
 
 \hline
 \textbf{Vincolo} & \textbf{Tipo} & \textbf{Descrizione} \\
-\hline
+
 \endhead
-
-Email & Dominio & L’attributo “email” della classe Utente deve contenere una combinazione non nulla di lettere, numeri e simboli, seguiti da una chiocciola (“@”), altre lettere/simboli, un punto (“.”), e finire con almeno due lettere. \\
+email .. PRIMARY KEY & Integrità dell'entità & Identifica univocamente ogni utente. Garantisce l'unicità dell'email e che essa non sia nulla.\\
 \hline
 
-Password & Dominio & L’attributo “password” della classe Utente deve essere lungo almeno 8 caratteri, e avere almeno una lettera maiuscola, una minuscola, un numero e un carattere speciale. \\
+check\_email & Dominio & L’attributo “email” della classe Utente deve contenere una combinazione non nulla di lettere, numeri e simboli, seguiti da una chiocciola (“@”), altre lettere/simboli, un punto (“.”), e finire con almeno due lettere. \\
+\hline
+password VARCHAR(255) NOT NULL & Dominio & Impone che l'attributo "password" della classe Utente sia una stringa alfanumerica <= 255 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_password & Dominio & L’attributo “password” della classe Utente deve essere lungo almeno 8 caratteri, e avere almeno una lettera maiuscola, una minuscola, un numero e un carattere speciale. \\
+\hline
+nome VARCHAR(50) NOT NULL (Utente) & Dominio & Impone che l'attributo "nome" della classe Utente sia una stringa alfanumerica <= 50 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_nome\_utente & Dominio & L’attributo “nome” della classe Utente deve contenere solo stringhe di caratteri alfabetici. \\
+\hline
+cognome VARCHAR(50) NOT NULL & Dominio & Impone che l'attributo "cognome" della classe Utente sia una stringa alfanumerica <= 50 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_cognome & Dominio & L’attributo “cognome” della classe Utente deve contenere solo stringhe di caratteri alfabetici. \\
 \hline
 
-Nome & Dominio & L’attributo “Nome” della classe Utente deve contenere solo stringhe di caratteri alfabetici, non vuote e con lunghezza <= 50 caratteri. \\
+tipo\_utente tipo\_utente\_enum NOT NULL & Dominio & L’attributo "tipoUtente" della classe Utente è un’enumerazione che può assumere solo i valori: chef, studente, chefStudente. \\
 \hline
 
-Cognome & Dominio & L’attributo “Cognome” della classe Utente deve contenere solo stringhe di caratteri alfabetici, non vuote e con lunghezza <= 50 caratteri. \\
+check\_ruolo\_dati & Tupla & Se l’attributo “tipoUtente” della classe Utente è studente o chefStudente, allora l’attributo “matricola” assume un valore alfanumerico <= 20. \\
+\hline
+matricola .. UNIQUE & Intrarelazionale & Impone l'assenza di duplicati per l'attributo, assicurando che ad ogni matricola corrisponda un solo profilo registrato nel sistema.\\
+\hline
+data\_inizio DATE NOT NULL & Dominio & L'attributo "dataInizio" della classe Corso deve essere una data valida nel formato previsto, non può essere nulla. \\
+\hline
+nome VARCHAR(50) NOT NULL (Corso) & Dominio & Impone che l'attributo "nome" della classe Corso sia una stringa alfanumerica <= 50 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_nome\_corso & Dominio & L'attributo "nome" della classe Corso deve contenere una stringa  con solo caratteri alfabetici. \\
+\hline
+frequenza VARCHAR(50) NOT NULL & Dominio & Impone che l'attributo "frequenza" ella classe Corso sia una stringa alfanumerica <= 50 caratteri e che sia obbligatoriamente non nullo. \\
+\hline
+trg\_partecipanti & Interrelazionale & L'attributo "numPartecipanti" della classe Corso è calcolato automaticamente in base al numero di iscrizioni associate. \\
+\hline
+num\_sessioni .. NOT NULL & Dominio & Impone che l'attributo "numSessioni" della classe Corso sia obbligatoriamente non nullo.\\
+\hline
+check\_num\_sessioni & Dominio & L'attributo "numSessioni" della classe Corso deve essere un intero positivo >0. \\
+\hline
+ ora\_inizio .. NOT NULL & Dominio & L'attributo "oraInizio" della classe Sessione deve essere una data valida nel formato previsto, non può essere nulla. \\
+\hline
+tipo\_sessione tipo\_sessione\_enum NOT NULL & Dominio & L'attributo "tipoSessione" della classe Sessione è un’enumerazione che può assumere solo i valori: presenza o online. \\
+\hline
+check\_logica\_sessione & Tupla & Se l'attributo "tipoSessione" della classe Sessione è "presenza", allora "teoria" deve essere NULL.  Se l'attributo "tipoSessione" è "online", allora "teoria" deve essere una stringa alfanumerica con lunghezza <=255. \\
 \hline
 
-TipoUtente & Dominio & L’attributo "tipoUtente" della classe Utente è un’enumerazione che può assumere solo i valori: chef, studente, chefStudente. \\
+trg\_aderenti & Interrelazionale & Se l'attributo "tipoSessione" della classe Sessione è "presenza", allora "numAderenti"  è calcolato automaticamente in base al numero di adesioni associate.\\
 \hline
 
-Specializzazione & N‑tupla & Se l’attributo “TipoUtente” è chef o chefStudente, allora l’attributo “Specializzazione” assume un valore alfabetico con lunghezza <= 50. \\
+trg\_check\_iscrizione & Interrelazionale & La relazione "Iscrizione" può coinvolgere solo utenti con tipoUtente = studente o chefStudente. \\
 \hline
 
-Matricola & N‑tupla & Se l’attributo “TipoUtente” è studente o chefStudente, allora l’attributo “Matricola” assume un valore alfanumerico con lunghezza <= 50. \\
+trg\_check\_adesione & Interrelazionale & La relazione "Adesione" può coinvolgere solo utenti con tipoUtente = studente o chefStudente e solo sessioni con tipoSessione = presenza. Inoltre verifica che l'utente sia iscritto al corso. \\
 \hline
 
-DataInizio & Dominio & L'attributo "DataInizio" della classe Corso deve essere una data valida nel formato previsto, non può essere nulla. \\
+trg\_check\_prepara & Interrelazionale & La relazione "Prepara" può coinvolgere solo sessioni con tipoSessione = presenza. Ogni sessione in presenza prepara almeno una ricetta e ogni ricetta è preparata in almeno una sessione. \\
+\hline
+nome VARCHAR(50) NOT NULL (Ricetta) & Dominio & Impone che l'attributo "nome" della classe Ricetta sia una stringa alfanumerica <= 50 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_nome\_ricetta & Dominio & L'attributo "nome" della classe Ricetta deve contenere una stringa alfabetica. \\
+\hline
+descrizione VARCHAR(250) NOT NULL & Dominio & Impone che l'attributo "descrizione" della classe Ricetta sia una stringa alfanumerica <= 250 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_descrizione & Dominio & L'attributo "descrizione" della classe Ricetta deve contenere una stringa alfabetica. \\
+\hline
+tempo TIME NOT NULL & Dominio & L'attributo "tempo" della classe Ricetta deve contenere un orario (ore, minuti, secondi) valido e non nullo. \\
+\hline
+nome .. PRIMARY KEY (Ingrediente) & Integrità dell'entità & Identifica univocamente ogni ingrediente. Garantisce l'unicità del nome e che esso non sia nullo.\\
+\hline
+check\_nome\_ingrediente & Dominio & L'attributo "nome" della classe Ingrediente deve contenere una stringa alfabetica. \\
+\hline
+unita\_di\_misura VARCHAR(20) NOT NULL & Dominio &  Impone che l'attributo "unitàDiMisura" della classe Ingrediente  sia una stringa alfanumerica <= 20 caratteri e che sia obbligatoriamente non nullo.\\
+\hline
+check\_unita\_di\_misura & Dominio & L'attributo "unitàDiMisura" della classe Ingrediente deve contenere una stringa alfabetica \\
+\hline
+trg\_check\_ specializzazione & Interrelazionale & La relazione "specializzatoIn" può coinvolgere solo utenti con tipoUtente uguale a chef o chefStudente. Un utente con ruolo di solo Studente non può possedere specializzazioni. \\
+\hline
+trg\_check\_gestisce & Interrelazionale & La relazione "Gestisce" può coinvolgere solo utenti con tipoUtente uguale a chef o chefStudente. Un utente con ruolo di solo Studente non può gestire Corsi o Sessioni.\\
+\hline
+trg\_check\_max\_ sessioni\_per\_corso & Interrelazionale & Impedisce l'inserimento o la modifica di tuple nella tabella Sessione qualora ciò comporti il superamento del valore "numSessioni" definito nella tabella Corso associata.\\
+\hline
+trq\_check\_num\_ sessioni\_corso\_update & Interrelazionale & Inibisce l'aggiornamento del attributo "numSessioni" nella tabella Corso verso un valore inferiore alla cardinalità attuale delle tuple correlate nella tabella Sessione, preservando la consistenza dei dati esistenti.\\
 \hline
 
-Nome & Dominio & L'attributo "Nome" della classe Corso deve contenere una stringa non vuota con solo caratteri alfabetici e lunghezza massima 50 caratteri. \\
-\hline
-
-Categoria & N‑tupla & L'attributo "Categoria" della classe Corso deve contenere almeno una categoria. Ogni elemento deve essere una stringa non vuota. \\
-\hline
-
-Frequenza & Dominio & L'attributo "Frequenza" della classe Corso deve contenere una stringa che rappresenta un intervallo temporale coerente. \\
-\hline
-
-NumPartecipanti & Intrarelazionale & L'attributo "NumPartecipanti" della classe Corso è calcolato automaticamente in base al numero di iscrizioni associate. \\
-\hline
-
-NumSessioni & Dominio & L'attributo "NumSessioni" della classe Corso deve essere un intero positivo >0. \\
-\hline
-
-OraInizio & Dominio & L'attributo "OraInizio" della classe Sessione deve essere una data valida nel formato previsto, non può essere nulla. \\
-\hline
-
-TipoSessione & Dominio & L'attributo "TipoSessione" della classe Sessione è un’enumerazione che può assumere solo i valori: presenza, online. \\
-\hline
-
-Quantità & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "Quantità" assume un valore numerico >0. \\
-\hline
-
-NumAderenti & Intrarelazionale & Se l'attributo "TipoSessione" è "presenza", allora "NumAderenti"  è calcolato automaticamente in base al numero di adesioni associate. \\
-\hline
-
-Teoria & Intrarelazionale & Se l'attributo "TipoSessione" è "online", allora "Teoria" deve essere una stringa alfanumerica con lunghezza <=255. \\
-\hline
-
-Iscrizione & N\-tupla & La relazione "Iscrizione" può coinvolgere solo utenti con tipoUtente = studente o chefStudente. \\
-\hline
-
-Adesione & N\-tupla & La relazione "Adesione" può coinvolgere solo utenti con tipoUtente = studente o chefStudente e solo sessioni con tipoSessione = presenza. \\
-\hline
-
-Prepara & N\-tupla & La relazione "Prepara" può coinvolgere solo sessioni con tipoSessione = presenza. Ogni sessione in presenza prepara almeno una ricetta e ogni ricetta è preparata in almeno una sessione. \\
-\hline
-
-Nome & Dominio & L'attributo "Nome" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
-\hline
-
-Descrizione & Dominio & L'attributo "Descrizione" della classe Ricetta deve contenere una stringa alfabetica non vuota con lunghezza <=250. \\
-\hline
-
-Tempo & Dominio & L'attributo "Tempo" della classe Ricetta deve contenere un orario (ore, minuti, secondi) valido e non nullo. \\
-\hline
-
-Nome & Dominio & L'attributo "Nome" della classe Ingrediente deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
-\hline
-
-UnitàDiMisura & Dominio & L'attributo "UnitàDiMisura" della classe Ingrediente deve contenere una stringa alfabetica non vuota con lunghezza <=50. \\
-\hline
 
 \end{longtable}
 \end{center}

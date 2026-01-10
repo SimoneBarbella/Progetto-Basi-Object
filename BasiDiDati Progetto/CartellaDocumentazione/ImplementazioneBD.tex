@@ -1,0 +1,153 @@
+\section{Implementazione della Base di Dati}
+In questo capitolo viene illustrata la fase di implementazione fisica del database, derivata direttamente dallo schema logico precedentemente definito. La codifica è stata realizzata utilizzando il linguaggio SQL (dialetto PostgreSQL), ponendo particolare attenzione alla robustezza e alla consistenza dei dati.
+\\
+Oltre alla definizione delle strutture tabellari, una parte centrale dello sviluppo ha riguardato la traduzione delle regole di business in vincoli di integrità attivi. Sono stati implementati domini personalizzati, vincoli CHECK per la validazione dei formati e, soprattutto, TRIGGER  per garantire il rispetto delle cardinalità minime e delle logiche di aggiornamento automatico.
+
+\subsection{Creazione e pulizia schema}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/immagini/creazione schema.png}
+\end{figure}
+ \subsection{Creazione delle enumerazioni}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/immagini/creazione enum.png}
+\end{figure}
+\clearpage
+\subsection{Creazione delle tabelle}
+\subsubsection{Tabella Utente}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Utente.png}
+\end{figure}
+\subsubsection{Tabella Corso}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Corso.png}
+\end{figure}
+\subsubsection{Tabella Sessione}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Sessione.png}
+\end{figure}
+\clearpage
+\subsubsection{Tabella Ricetta}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Ricetta.png}
+\end{figure}
+\subsubsection{Tabella Ingrediente}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Ingrediente.png}
+\end{figure}
+\subsubsection{Tabella Iscrizione}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Iscrizione.png}
+\end{figure}
+\clearpage
+\subsubsection{Tabella Adesione}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Adesione.png}
+\end{figure}
+\subsubsection{Tabella Gestisce}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Gestisce.png}
+\end{figure}
+\subsubsection{Tabella Prepara}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Prepara.png}
+\end{figure}
+\subsubsection{Tabella Richiede}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Richiede.png}
+\end{figure}
+\subsubsection{Tabella Categoria\_Corso}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Categoria.png}
+\end{figure}
+\subsubsection{Tabella Specializzazione\_Chef}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/tabelle/tabella Specializzazione.png}
+\end{figure}
+\subsection{Creazione dei constraints}
+\subsubsection{Su Corso}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli check/vincoli Corso.png}
+\end{figure}
+\subsubsection{Su Utente}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli check/vincoli Utente.png}
+\end{figure}
+\clearpage
+\subsubsection{Su Ingrediente}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli check/vincoli Ingrediente.png}
+\end{figure}
+\subsubsection{Su Ricetta}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli check/vincoli Ricetta.png}
+\end{figure}
+\subsubsection{Su Sessione}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli check/vincoli Sessione.png}
+\end{figure}
+\subsubsection{Su Richiede}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli check/vincoli Richiede.png}
+\end{figure}
+\clearpage
+\subsection{Triggers per il controllo dei vincoli}
+\subsubsection{Su Adesione}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli trigger/adesione.png}
+\end{figure}
+\clearpage
+\subsubsection{Su Iscrizione}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli trigger/iscrizione.png}
+\end{figure}
+\subsubsection{Su Compone}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli trigger/numero di sessioni.png}
+\end{figure}
+\clearpage
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/vincoli trigger/modifica numero di sessioni.png}
+\end{figure}
+
+\subsection{Triggers per la gestione dei dati derivabili}
+\subsubsection{Di num\_partecipanti}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/gestione derivabili/num Partecipanti.png}
+\end{figure}
+\clearpage
+\subsubsection{Di num\_aderenti}
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/gestione derivabili/num Aderenti.png}
+\end{figure}
+\subsection{Creazione viste}
+
+\begin{figure}[h!]
+    \centering 
+    \includegraphics[width=0.8\textwidth]{CartellaDocumentazione/immagini/creazione view.png}
+\end{figure}

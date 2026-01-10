@@ -1,8 +1,7 @@
-\section{Dizionari}
-\subsection{Dizionario delle Classi}
+\subsection{Dizionari}
+\subsubsection{Dizionario delle Classi}
 
 \begin{table}[H] % oppure [htbp]
-\caption{Dizionario delle Classi:1}
 \label{tab:classi1}
 
 \centering
@@ -14,40 +13,38 @@
     \textbf{Classe} & \textbf{Descrizione} & \textbf{Attributi} \\
     \hline
     \multirow{12}{=}{\centering Utente} & \multirow{12}{=}{\centering Descrittore di ogni Studente o Chef } &
-\texttt{email} (String): è un indirizzo email unico e valido che permette di contattare l’utente.\\
+\texttt{email} [PK](String): è un indirizzo email unico e valido che permette di contattare l’utente.\\
 
 & & \texttt{nome} (String): è il nome dell'utente.\\
 
-& & \texttt{cognome} (String): è cognome dell'utente \\
+& & \texttt{cognome} (String): è cognome dell'utente. \\
 
 & & \texttt{password} (String): una password permette all'utente di proteggere il suo account e le sue informazioni.\\
 
-& & \texttt{specializzazione} (String)[0..*]: insieme di specializzazioni dello chef (realizzato tramite tabella \texttt{Specializzazione\_Chef}).\\
+& & \texttt{matricola} (String): string alfanumerica che identifica lo studente. \\ 
 
-& & \texttt{matricola} (String): string alfanumerica che identifica lo studente \\ 
-
-& & \texttt{tipoUtente} (TipoUtente): indica il tipo di utente: (chef), (studente) oppure (chefStudente) \\
+& & \texttt{tipoUtente} (TipoUtente): indica il tipo di utente: (chef), (studente) oppure (chefStudente). \\
 
 
 \hline
-\multirow{8}{=}{\centering Corso} & \multirow{8}{=}{\centering Descrittore di ciascun corso creato.} &
-{\ttfamily dataInizio} (Data): indica l'inizio del corso.\\
+\multirow{8}{=}{\centering Corso} & \multirow{8}{=}{\centering Descrittore di ciascun corso creato} &
+
+\texttt{id\_corso} [PK] (Int): identificativo univoco di Corso.\\
+
+&& \texttt{dataInizio} (Data): indica l'inizio del corso.\\
 
 & & \texttt{nome} (String): è il nome assegnato al corso. \\
 
-& & \texttt{categoria} (String)[1..*]: insieme di categorie del corso (realizzato tramite tabella \texttt{Categoria\_Corso}).\\
+& & \texttt{frequenza} (String): indica ogni quanti giorni il corso si svolge.\\
 
-& & \texttt{frequenza} (String): indica ogni quanti giorni il corso si svolge\\
-
-& & \texttt{numPartecipanti} (Int): Numero dei partecipanti al corso \\
+& & \texttt{numPartecipanti} (Int): Numero dei partecipanti al corso. \\
 & & \texttt{numSessioni} (Int): specifica quante sessioni ha un corso. \\
 \hline
 
-\multirow{3}{=}{\centering Iscrizione} & \multirow{3}{=}{\centering Descrittore dell'iscrizione degli utenti.} &
+\multirow{3}{=}{\centering Iscrizione} & \multirow{3}{=}{\centering Descrittore dell'iscrizione degli utenti} &
 \texttt{dataIscrizione} (Data): indica l'inizio dell'iscrizione per un corso.\\
 
-& & \texttt{Stato} (String): indica lo stato dell'iscrizione di uno studente \\
-
+& & \texttt{Stato} (String): indica lo stato dell'iscrizione di uno studente. \\
 \hline
 
 \end{tabular}
@@ -59,7 +56,6 @@
 
 
 \begin{table}[H] % oppure [htbp]
-\caption{Dizionario delle Classi: end}
 \label{tab:classi2}
 \centering
 \resizebox{0.9\textwidth}{!}{
@@ -69,21 +65,23 @@
                 \hline
     \textbf{Classe} & \textbf{Descrizione} & \textbf{Attributi} \\
     \hline
-    \multirow{12}{=}{\centering Sessione} & \multirow{12}{=}{\centering Descrittore di ciascuna sessione presente in un corso} & \texttt{oraInizio} (Data): orario di inizio della sessione.\\
+    \multirow{12}{=}{\centering Sessione} & \multirow{12}{=}{\centering Descrittore di ciascuna sessione presente in un corso} & 
+    \texttt{id\_sessione} [PK] (Int): identificativo univoco di Sessione\\
+    &&\texttt{oraInizio} (Data): orario di inizio della sessione.\\
 
 & & \texttt{numAderenti} (Int): numero di partecipanti alla sessione. \\
 
-& & \texttt{quantità} (Double): la quantità degli ingredienti per la ogni studente cosi da evitare sprechi.\\
-
-& & \texttt{teoria} (String): argomento teorico spiegato in sessione\\
+& & \texttt{teoria} (String): argomento teorico spiegato in sessione.\\
 
 & & \texttt{tipoSessione} (TipoSessione): indica il tipo di sessione: (online) oppure (presenza). \\ 
 
 
 
 \hline
-\multirow{6}{=}{\centering Ricetta} & \multirow{6}{=}{\centering Descrittore di ciascuna ricetta usata in una sessione.} &
-\texttt{nome} (String): nome della ricetta.\\
+\multirow{6}{=}{\centering Ricetta} & \multirow{6}{=}{\centering Descrittore di ciascuna ricetta usata in una sessione} &
+\texttt{id\_ricetta} [PK] (Int): identificativo univoco di Ricetta.\\
+
+&& \texttt{nome} (String): nome della ricetta.\\
 
 & & \texttt{descrizione} (String): la preaparazione della ricetta. \\
 
@@ -92,42 +90,32 @@
 
 \hline
 
-\multirow{4}{=}{\centering Ingrediente} & \multirow{4}{=}{\centering Descrittore di ciascun ingrediente usato per una ricetta.} &
-\texttt{nome} (String): nome dell'ingrediente.\\
+\multirow{4}{=}{\centering Ingrediente} & \multirow{4}{=}{\centering Descrittore di ciascun ingrediente usato per una ricetta} &
+\texttt{nome} [PK] (String): nome dell'ingrediente.\\
 
 & & \texttt{unitàDiMisura} (String): specifica dell'unità di misura di un ingrediente ES: Kg, litri ecc.. .\\
 
 \hline
 
 
-\centering Adesione & \centering Classe associativa per gestire l'associazione tra Utente (studente/chefStudente) e Sessione (presenza). &
+\centering Adesione & \centering Classe associativa per gestire l'associazione tra Utente (studente/chefStudente) e Sessione (presenza) &
 \texttt{dataAdesione} (Data): data relativa all'adesione di uno studente ad una sessione.\\
 
 
 \hline
 
-\centering Richiede & \centering Classe associativa per gestire l'associazione tra Ingrediente e Ricetta. &
-\texttt{quantitàNecessaria} (Double): quantità utilizzata di ogni singolo ingrediente per una ricetta.\\
+\centering Richiede & \centering Classe associativa per gestire l'associazione tra Ingrediente e Ricetta &
+\texttt{quantitàNecessaria} (Decimal): quantità utilizzata di ogni singolo ingrediente per una ricetta.\\
 
 \hline
 
-\centering Categoria\_Corso & \centering Tabella per l'attributo multivalore categoria del corso. &
+\centering Categoria\_Corso & \centering Classe per gestire l'attributo multivalore categoria del corso &
 {\ttfamily categoria} (String): una categoria associata a un corso.\\
 
 \hline
 
-\centering Specializzazione\_ \space Chef & \centering Tabella per l'attributo multivalore specializzazione dello chef. &
+\centering Specializzazione\_ \space Chef & \centering Classe per gestire l'attributo multivalore specializzazione dello chef. &
 {\ttfamily specializzazione} (String): una specializzazione associata a uno chef.\\
-
-\hline
-
-\centering Gestisce & \centering Classe associativa per gestire l'associazione tra Chef (Utente) e Corso. &
-Associazione tra \texttt{email\_chef} e \texttt{id\_corso}.\\
-
-\hline
-
-\centering Prepara & \centering Classe ponte per l'associazione tra Sessione e Ricetta. &
-Associazione tra \texttt{id\_sessione} e \texttt{id\_ricetta}.\\
 
 \hline
 
@@ -136,30 +124,25 @@ Associazione tra \texttt{id\_sessione} e \texttt{id\_ricetta}.\\
 
 \end{table}
 
-
-
-\subsection{Dizionario Associazioni}
+\subsubsection{Dizionario Associazioni}
 
 
 \begin{table}[H] % oppure [htbp]
-\caption{Dizionario delle associazioni: }
 \label{tab:classi} 
 \centering
 %\resizebox{1.\textwidth}{!}{
 \begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
                 {\centering\arraybackslash}m{0.28\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
-               
-
                 \hline
     \textbf{Associazione} & \textbf{Descrizione} & \textbf{Molteplicità delle Classi coinvolte} \\
     \hline
-  \centering adesione & \centering Richiesta di adesione da parte di uno studente & Utente [0..*] - Adesione [1] \\
+  \centering richiede (adesione) & \centering Richiesta di adesione da parte di uno studente & Utente [0..*] - Adesione [1] \\
 
 
 
 \hline
 
-  \centering iscrizione & \centering Richiesta di iscrizione da parte di uno studente & Utente [0..*] - Iscrizione [1] \\
+  \centering richiede (iscrizione) & \centering Richiesta di iscrizione da parte di uno studente & Utente [0..*] - Iscrizione [1] \\
 
 \hline
 
@@ -190,13 +173,34 @@ Associazione tra \texttt{id\_sessione} e \texttt{id\_ricetta}.\\
 
   \centering relativa & \centering Iscrizione di uno studente per un corso & Iscrizione [1] - Corso [1..*] \\
 
+\hline 
+   \centering specializzatoIn & \centering Specializzazione di uno chef & Utente [1] - Specializzazione\_Chef [0..*] \\
+
+\hline
+   \centering categorizzatoIn & \centering Categoria a cui appartiene un corso & Corso [1] - Categoria\_Corso [1..*] \\
+
 \hline
 
 \end{tabular}
 %}
 
 \end{table}
+\subsubsection{Dizionario delle Viste}
 
-\clearpage
-\subsection{Dizionario Vincoli}
-\input{CartellaDocumentazione/Vincoli}
+\begin{table}[H] % oppure [htbp]
+\label{tab:classi} 
+\centering
+%\resizebox{1.\textwidth}{!}{
+\begin{tabular}{|>{\centering\arraybackslash}m{0.22\textwidth}|>
+                {\centering\arraybackslash}m{0.28\textwidth}|>{\raggedright\arraybackslash}m{0.45\textwidth}|}
+                \hline
+    \textbf{Viste} & \textbf{Descrizione} & \textbf{Attributi} \\
+    \hline
+  \centering Vista\_Fabbisogni\_\\Sessione & \centering Struttura virtuale che aggrega i dati logistici. Incrocia le adesioni e le ricette per calcolare il fabbisogno puntuale di materie prime & quantità\_totale: (Derivato) Valore numerico che esprime il fabbisogno complessivo dello specifico ingrediente per la specifica sessione (calcolato come: Dose Unitaria × Numero Partecipanti). \\
+  \hline
+
+\end{tabular}
+%}
+\end{table}
+\subsubsection{Dizionario Vincoli}
+\input{CartellaDocumentazione/testo/Vincoli}
