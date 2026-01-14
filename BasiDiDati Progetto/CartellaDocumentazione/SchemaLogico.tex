@@ -96,64 +96,63 @@ Dalla trasformazione del diagramma delle classi deriva la seguente organizzazion
      \space id\_sessione $\rightarrow$ Sessione.id\_sessione
   \end{minipage}%
    }\\
-\clearpage
 \subsubsection{Traduzione delle associazioni}
-\begin{table}[H] 
-\label{tab:traduzione_associazioni} 
+
+\begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.2} 
-\begin{tabular}{|>{\centering\arraybackslash}m{0.30\textwidth}|>{\raggedright\arraybackslash}m{0.65\textwidth}|}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|p{0.30\textwidth}|p{0.65\textwidth}|}
 \hline
-    \textbf{Associazione} & \textbf{Implementazione} \\
-    \hline
+\textbf{Associazione} & \textbf{Implementazione} \\
+\hline
 
-    \textbf{adesione} \newline \textit{(Utente - Adesione)} & 
-    \textbf{Importazione Chiave Esterna:} L'entità \textit{Adesione} (lato N) importa la chiave primaria di \textit{Utente} (\texttt{id\_utente}) come chiave esterna. \\
-    \hline
+\textbf{adesione} \newline \textit{(Utente - Adesione)} &
+\textbf{Importazione Chiave Esterna:} L'entità \textit{Adesione} (lato N) importa la chiave primaria di \textit{Utente} (\texttt{id\_utente}) come chiave esterna. \\
+\hline
 
-    \textbf{iscrizione} \newline \textit{(Utente - Iscrizione)} & 
-    \textbf{Importazione Chiave Esterna:} L'entità \textit{Iscrizione} importa la chiave primaria di \textit{Utente} (\texttt{id\_utente}) come chiave esterna. \\
-    \hline
+\textbf{iscrizione} \newline \textit{(Utente - Iscrizione)} &
+\textbf{Importazione Chiave Esterna:} L'entità \textit{Iscrizione} importa la chiave primaria di \textit{Utente} (\texttt{id\_utente}) come chiave esterna. \\
+\hline
 
-    \textbf{gestisce} \newline \textit{(Chef - Corso)} & 
-    \textbf{Importazione Chiave Esterna:} Data la cardinalità 1:N, la tabella \textit{Corso} ospita la chiave esterna dello \textit{Chef} (\texttt{id\_chef}). \\
-    \hline
+\textbf{gestisce} \newline \textit{(Chef - Corso)} &
+\textbf{Importazione Chiave Esterna:} Data la cardinalità 1:N, la tabella \textit{Corso} ospita la chiave esterna dello \textit{Chef} (\texttt{id\_chef}). \\
+\hline
 
-    \textbf{compone} \newline \textit{(Corso - Sessione)} & 
-    \textbf{Importazione Chiave Esterna:} La tabella \textit{Sessione} importa la chiave primaria di \textit{Corso} (\texttt{id\_corso}) come chiave esterna. \\
-    \hline  
+\textbf{compone} \newline \textit{(Corso - Sessione)} &
+\textbf{Importazione Chiave Esterna:} La tabella \textit{Sessione} importa la chiave primaria di \textit{Corso} (\texttt{id\_corso}) come chiave esterna. \\
+\hline
 
-    \textbf{prepara} \newline \textit{(Sessione - Ricetta)} & 
-    \textbf{Nuova Tabella (Ponte):} Data la cardinalità Molti-a-Molti, si crea la tabella di raccordo \textit{Prepara} composta dalle chiavi esterne delle due entità (\texttt{id\_sessione}, \texttt{id\_ricetta}). \\
-    \hline
+\textbf{prepara} \newline \textit{(Sessione - Ricetta)} &
+\textbf{Nuova Tabella (Ponte):} Data la cardinalità Molti-a-Molti, si crea la tabella di raccordo \textit{Prepara} composta dalle chiavi esterne delle due entità (\texttt{id\_sessione}, \texttt{id\_ricetta}). \\
+\hline
 
-    \textbf{haBisogno} \newline \textit{(Ricetta - Richiede)} & 
-    \textbf{Importazione Chiave Esterna:} La tabella \textit{Richiede} importa la chiave primaria della \textit{Ricetta} (\texttt{id\_ricetta}). \\
-    \hline
+\textbf{haBisogno} \newline \textit{(Ricetta - Richiede)} &
+\textbf{Importazione Chiave Esterna:} La tabella \textit{Richiede} importa la chiave primaria della \textit{Ricetta} (\texttt{id\_ricetta}). \\
+\hline
 
-    \textbf{necessita} \newline \textit{(Richiede - Ingrediente)} & 
-    \textbf{Importazione Chiave Esterna:} La tabella \textit{Richiede} importa la chiave primaria dell'\textit{Ingrediente} (\texttt{id\_ingrediente}). \\
-    \hline
+\textbf{necessita} \newline \textit{(Richiede - Ingrediente)} &
+\textbf{Importazione Chiave Esterna:} La tabella \textit{Richiede} importa la chiave primaria dell'\textit{Ingrediente} (\texttt{id\_ingrediente}). \\
+\hline
 
-    \textbf{per} \newline \textit{(Adesione - Sessione)} & 
-    \textbf{Importazione Chiave Esterna:} La tabella \textit{Adesione} importa la chiave primaria della \textit{Sessione} (\texttt{id\_sessione}). \\
-    \hline
+\textbf{per} \newline \textit{(Adesione - Sessione)} &
+\textbf{Importazione Chiave Esterna:} La tabella \textit{Adesione} importa la chiave primaria della \textit{Sessione} (\texttt{id\_sessione}). \\
+\hline
 
-    \textbf{relativa} \newline \textit{(Iscrizione - Corso)} & 
-    \textbf{Importazione Chiave Esterna:} La tabella \textit{Iscrizione} importa la chiave primaria del \textit{Corso} (\texttt{id\_corso}). \\
-    \hline 
+\textbf{relativa} \newline \textit{(Iscrizione - Corso)} &
+\textbf{Importazione Chiave Esterna:} La tabella \textit{Iscrizione} importa la chiave primaria del \textit{Corso} (\texttt{id\_corso}). \\
+\hline
 
-    \textbf{specializzatoIn} \newline \textit{(Chef - Specializzazione)} & 
-    \textbf{Nuova Tabella:} La tabella \textit{Specializzazione\_Chef} viene creata per gestire l'attributo multivalore, importando la chiave primaria dello chef (\texttt{email\_chef}). \\
-    \hline
+\textbf{specializzatoIn} \newline \textit{(Chef - Specializzazione)} &
+\textbf{Nuova Tabella:} La tabella \textit{Specializzazione\_Chef} viene creata per gestire l'attributo multivalore, importando la chiave primaria dello chef (\texttt{email\_chef}). \\
+\hline
 
-    \textbf{categorizzatoIn} \newline \textit{(Corso - Categoria)} & 
-    \textbf{Nuova Tabella:} La tabella \textit{Categoria\_Corso} viene creata per gestire l'attributo multivalore, importando la chiave primaria del corso (\texttt{id\_corso}). \\
-    \hline
+\textbf{categorizzatoIn} \newline \textit{(Corso - Categoria)} &
+\textbf{Nuova Tabella:} La tabella \textit{Categoria\_Corso} viene creata per gestire l'attributo multivalore, importando la chiave primaria del corso (\texttt{id\_corso}). \\
+\hline
 
 \end{tabular}
 \end{table}
-   
    \clearpage
 \subsubsection{Schema logico finale}
 Di seguito viene riportato lo schema logico finale risultante, completo di chiavi primarie, esterne e attributi:\\
