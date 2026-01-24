@@ -1,0 +1,8 @@
+Metti qui la tua immagine di sfondo.
+
+Nome atteso: login-bg.png
+Percorso (resources): com/unina/foodlab/Boundary/assets/login-bg.png
+
+Suggerimenti:
+- Dimensione consigliata: almeno 1280x720 (16:9)
+- Formato: PNG (o rinomina il riferimento nel CSS)

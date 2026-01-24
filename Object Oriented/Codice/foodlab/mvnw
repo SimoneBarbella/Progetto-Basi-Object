@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+# Minimal Maven Wrapper script (Unix). On Windows use mvnw.cmd
+
+BASEDIR=$(cd "$(dirname "$0")" && pwd)
+WRAPPER_JAR="$BASEDIR/.mvn/wrapper/maven-wrapper.jar"
+WRAPPER_PROPS="$BASEDIR/.mvn/wrapper/maven-wrapper.properties"
+
+if [ ! -f "$WRAPPER_PROPS" ]; then
+  echo "Missing $WRAPPER_PROPS" >&2
+  exit 1
+fi
+
+if [ ! -f "$WRAPPER_JAR" ]; then
+  WRAPPER_URL=$(grep '^wrapperUrl=' "$WRAPPER_PROPS" | sed 's/wrapperUrl=//')
+  if [ -z "$WRAPPER_URL" ]; then
+    WRAPPER_URL="https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar"
+  fi
+  echo "Downloading Maven Wrapper..."
+  mkdir -p "$BASEDIR/.mvn/wrapper" || exit 1
+  (command -v curl >/dev/null 2>&1 && curl -fsSL "$WRAPPER_URL" -o "$WRAPPER_JAR") || \
+  (command -v wget >/dev/null 2>&1 && wget -q "$WRAPPER_URL" -O "$WRAPPER_JAR") || \
+  (echo "Neither curl nor wget found to download Maven Wrapper" >&2; exit 1)
+fi
+
+exec java -classpath "$WRAPPER_JAR" -Dmaven.multiModuleProjectDirectory="$BASEDIR" org.apache.maven.wrapper.MavenWrapperMain "$@"

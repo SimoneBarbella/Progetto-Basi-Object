@@ -9,6 +9,7 @@ public class DatabaseConnection {
 
     private static DatabaseConnection istanza = null;
     private Connection conn = null;
+    private SQLException lastSqlException = null;
 
     // Costruttore privato 
     private DatabaseConnection() {
@@ -17,8 +18,8 @@ public class DatabaseConnection {
             Class.forName("org.postgresql.Driver");
 
             String url = "jdbc:postgresql://localhost:5432/postgres";
-            String user = "postgres";
-            String password = "password"; //La password è la tua di postgres
+            String user = ""; //Il tuo user di postgres
+            String password = ""; //La password è la tua di postgres
 
             // Apertura connessione 
             conn = DriverManager.getConnection(url, user, password);
@@ -35,6 +36,7 @@ public class DatabaseConnection {
             System.out.println("Driver PostgreSQL non trovato");
             System.out.println(e);
         } catch (SQLException e) {
+            lastSqlException = e;
             System.out.println("Connessione Fallita");
             System.out.println(e);
         }
@@ -50,6 +52,11 @@ public class DatabaseConnection {
 
     // Restituisce la Connection
     public Connection getConnection() {
+        if (conn == null) {
+            throw new IllegalStateException(
+                    "Connessione DB non disponibile. Controlla url/user/password in DatabaseConnection.",
+                    lastSqlException);
+        }
         return conn;
     }
 }
