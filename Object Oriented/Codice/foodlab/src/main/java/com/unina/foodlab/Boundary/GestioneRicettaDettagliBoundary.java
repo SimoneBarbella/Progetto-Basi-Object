@@ -5,6 +5,7 @@ import com.unina.foodlab.Entity.Chef;
 import com.unina.foodlab.Entity.Corso;
 import com.unina.foodlab.Entity.IngredienteQuantita;
 import com.unina.foodlab.Entity.Ricetta;
+import com.unina.foodlab.Entity.SessionePresenza;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,6 +16,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -32,17 +34,35 @@ public class GestioneRicettaDettagliBoundary {
     private Label ricettaTempoLabel;
 
     @FXML
-    private Label ricettaDescrLabel;
+    private TextArea ricettaDescrArea;
+
+    @FXML
+    private ListView<Ricetta> ricetteListView;
 
     @FXML
     private ListView<IngredienteQuantita> ingredientiListView;
 
     private Corso corso;
     private Chef chef;
-    private Ricetta ricetta;
+    private SessionePresenza sessione;
 
     @FXML
     private void initialize() {
+        if (ricetteListView != null) {
+            ricetteListView.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+                @Override
+                protected void updateItem(Ricetta item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        String tempo = item.getTempo() != null ? item.getTempo().toString() : "";
+                        setText(item.getNome() + (tempo.isEmpty() ? "" : " (" + tempo + ")"));
+                    }
+                }
+            });
+            ricetteListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> showRicetta(newVal));
+        }
         if (ingredientiListView != null) {
             ingredientiListView.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
                 @Override
@@ -60,7 +80,12 @@ public class GestioneRicettaDettagliBoundary {
     }
 
     public void initData(Ricetta ricetta, Corso corso, Chef chef) {
-        this.ricetta = ricetta;
+        // compatibilità: dettagli per una singola ricetta
+        initDataSessione(null, ricetta, corso, chef);
+    }
+
+    public void initDataSessione(SessionePresenza sessione, Ricetta preselect, Corso corso, Chef chef) {
+        this.sessione = sessione;
         this.corso = corso;
         this.chef = chef;
 
@@ -70,6 +95,36 @@ public class GestioneRicettaDettagliBoundary {
             corsoLabel.setText(nome + (id != null ? " (ID " + id + ")" : ""));
         }
 
+        List<Ricetta> ricette;
+        if (sessione != null && sessione.getIdSessione() != null) {
+            ricette = GestoreRicette.getInstance().getRicettePerSessione(sessione.getIdSessione());
+        } else if (preselect != null) {
+            ricette = java.util.List.of(preselect);
+        } else {
+            ricette = java.util.List.of();
+        }
+
+        if (ricetteListView != null) {
+            ricetteListView.setItems(javafx.collections.FXCollections.observableArrayList(ricette));
+
+            if (preselect != null) {
+                for (Ricetta r : ricette) {
+                    if (r != null && r.getIdRicetta() != null && r.getIdRicetta().equals(preselect.getIdRicetta())) {
+                        ricetteListView.getSelectionModel().select(r);
+                        break;
+                    }
+                }
+            }
+            if (!ricetteListView.getItems().isEmpty() && ricetteListView.getSelectionModel().getSelectedItem() == null) {
+                ricetteListView.getSelectionModel().selectFirst();
+            }
+        } else {
+            // se manca la lista, mostra comunque la ricetta preselezionata
+            showRicetta(preselect);
+        }
+    }
+
+    private void showRicetta(Ricetta ricetta) {
         if (ricettaNomeLabel != null) {
             ricettaNomeLabel.setText("Nome: " + (ricetta != null ? ricetta.getNome() : ""));
         }
@@ -77,13 +132,17 @@ public class GestioneRicettaDettagliBoundary {
             String tempo = ricetta != null && ricetta.getTempo() != null ? ricetta.getTempo().toString() : "";
             ricettaTempoLabel.setText("Tempo: " + tempo);
         }
-        if (ricettaDescrLabel != null) {
-            ricettaDescrLabel.setText("Descrizione: " + (ricetta != null ? ricetta.getDescrizione() : ""));
+        if (ricettaDescrArea != null) {
+            ricettaDescrArea.setText(ricetta != null && ricetta.getDescrizione() != null ? ricetta.getDescrizione() : "");
         }
 
-        if (ingredientiListView != null && ricetta != null && ricetta.getIdRicetta() != null) {
-            List<IngredienteQuantita> ingredienti = GestoreRicette.getInstance().getIngredientiPerRicetta(ricetta.getIdRicetta());
-            ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredienti));
+        if (ingredientiListView != null) {
+            if (ricetta != null && ricetta.getIdRicetta() != null) {
+                List<IngredienteQuantita> ingredienti = GestoreRicette.getInstance().getIngredientiPerRicetta(ricetta.getIdRicetta());
+                ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredienti));
+            } else {
+                ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList());
+            }
         }
     }
 

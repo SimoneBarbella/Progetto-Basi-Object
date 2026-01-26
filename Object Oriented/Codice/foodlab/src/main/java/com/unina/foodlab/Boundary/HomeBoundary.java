@@ -132,6 +132,9 @@ public class HomeBoundary {
             stage.setScene(new Scene(root));
             stage.centerOnScreen();
             stage.showAndWait();
+
+            // dopo la chiusura della finestra ricarica i corsi
+            loadCorsi();
         } catch (IOException e) {
             System.err.println("[HomeBoundary] Errore caricamento creazioneCorso.fxml: " + e.getMessage());
             e.printStackTrace();

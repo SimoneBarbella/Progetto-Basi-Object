@@ -58,4 +58,12 @@ public class GestoreCorsi {
         }
     }
 
+    public List<String> getCategorieEsistenti() {
+        try {
+            return corsoDao.findAllCategorieDistinct();
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore caricamento categorie esistenti", e);
+        }
+    }
+
 }

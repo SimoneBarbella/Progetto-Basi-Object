@@ -86,14 +86,14 @@ public class ChefDao {
             ps.setString(2, chef.getNome());
             ps.setString(3, chef.getCognome());
             ps.setString(4, chef.getPassword());
-            // store enum as lowercase expected by DB
+
             TipoUtente t = chef.getTipoUtente();
             ps.setString(5, t == null ? "chef" : (t.name().toLowerCase()));
             int updated = ps.executeUpdate();
             if (updated == 0) return false;
         }
 
-        // handle specializzazione (may be comma-separated)
+
         if (chef.getSpecializzazione() != null && !chef.getSpecializzazione().isEmpty()) {
             String[] specs = chef.getSpecializzazione().split(",");
             String insertSpec = "INSERT INTO Specializzazione_Chef(email_chef, specializzazione) VALUES(?,?)";
@@ -123,7 +123,6 @@ public class ChefDao {
             if (updated == 0) return false;
         }
 
-        // Replace specializzazioni: delete existing and insert provided
         String deleteSpecs = "DELETE FROM Specializzazione_Chef WHERE email_chef = ?";
         try (PreparedStatement psd = conn.prepareStatement(deleteSpecs)) {
             psd.setString(1, chef.getEmail());
@@ -147,7 +146,7 @@ public class ChefDao {
     }
 
     public boolean deleteByEmail(String email) throws SQLException {
-        String deleteUtente = "DELETE FROM Utente WHERE email = ?"; // cascades will remove related rows
+        String deleteUtente = "DELETE FROM Utente WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(deleteUtente)) {
             ps.setString(1, email);
             int deleted = ps.executeUpdate();

@@ -17,10 +17,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -59,7 +62,7 @@ public class GestioneSessioniBoundary {
     private javafx.scene.control.ComboBox<TipoSessione> tipoSessioneCombo;
 
     @FXML
-    private TextField teoriaField;
+    private TextArea teoriaField;
 
     private Corso corso;
     private Chef chef;
@@ -103,6 +106,31 @@ public class GestioneSessioniBoundary {
                     val = ((SessioneOnline) s).getTeoria();
                 }
                 return new javafx.beans.property.SimpleStringProperty(val == null ? "" : val);
+            });
+
+            teoriaCol.setCellFactory(col -> {
+                TableCell<Sessione, String> cell = new TableCell<>() {
+                    private final Text text = new Text();
+
+                    {
+                        text.wrappingWidthProperty().bind(col.widthProperty().subtract(12));
+                        setGraphic(text);
+                    }
+
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty || item == null) {
+                            text.setText("");
+                            setText(null);
+                        } else {
+                            text.setText(item);
+                            setText(null);
+                        }
+                    }
+                };
+                cell.setPrefHeight(javafx.scene.control.Control.USE_COMPUTED_SIZE);
+                return cell;
             });
         }
         if (aderentiCol != null) {
@@ -225,7 +253,6 @@ public class GestioneSessioniBoundary {
             LocalDateTime dataOra = LocalDateTime.of(data, ora);
             GestoreSessioni.getInstance().creaSessione(corso, dataOra, tipo, teoria);
             if (dataSessionePicker != null) dataSessionePicker.setValue(null);
-            if (tipoSessioneCombo != null) tipoSessioneCombo.setValue(null);
             if (oraSessioneField != null) oraSessioneField.clear();
             if (teoriaField != null) teoriaField.clear();
             loadSessioni();

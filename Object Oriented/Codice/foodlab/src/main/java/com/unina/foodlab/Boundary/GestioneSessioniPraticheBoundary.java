@@ -23,9 +23,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -69,7 +71,7 @@ public class GestioneSessioniPraticheBoundary {
     private TextField nuovaRicettaNomeField;
 
     @FXML
-    private TextField nuovaRicettaDescrField;
+    private TextArea nuovaRicettaDescrField;
 
     @FXML
     private TextField nuovaRicettaTempoField;
@@ -110,6 +112,12 @@ public class GestioneSessioniPraticheBoundary {
     private Corso corso;
     private Chef chef;
     private SessionePresenza sessioneSelezionata;
+
+        private final javafx.collections.ObservableList<Ingrediente> ingredientiDisponibiliMaster =
+            javafx.collections.FXCollections.observableArrayList();
+        private final javafx.collections.transformation.FilteredList<Ingrediente> ingredientiDisponibiliFiltered =
+            new javafx.collections.transformation.FilteredList<>(ingredientiDisponibiliMaster, i -> true);
+        private boolean suppressIngredienteFilter = false;
 
     private final List<IngredienteQuantita> ingredientiNuovaRicetta = new ArrayList<>();
     private final Map<Integer, String> ricettePerSessione = new HashMap<>();
@@ -192,6 +200,22 @@ public class GestioneSessioniPraticheBoundary {
 
                 @Override
                 public Ricetta fromString(String string) {
+                    if (string == null) return null;
+                    String s = string.trim();
+                    if (s.isEmpty()) return null;
+                    // prova match esatto sul testo mostrato
+                    for (Ricetta r : ricetteCombo.getItems()) {
+                        if (r == null) continue;
+                        String shown = toString(r);
+                        if (shown != null && shown.equals(s)) return r;
+                    }
+                    // fallback: match per nome 
+                    int parenIdx = s.indexOf('(');
+                    String name = parenIdx > 0 ? s.substring(0, parenIdx).trim() : s;
+                    for (Ricetta r : ricetteCombo.getItems()) {
+                        if (r == null || r.getNome() == null) continue;
+                        if (r.getNome().equalsIgnoreCase(name)) return r;
+                    }
                     return null;
                 }
             });
@@ -211,13 +235,19 @@ public class GestioneSessioniPraticheBoundary {
                 }
             });
             ricetteListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                if (dettaglioRicettaButton != null) {
-                    dettaglioRicettaButton.setDisable(newVal == null);
+                updateDettagliRicetteButtonState();
+            });
+
+            ricetteListView.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && !ricetteListView.getSelectionModel().isEmpty()) {
+                    onDettaglioRicettaClick(new ActionEvent(ricetteListView, ricetteListView));
                 }
             });
         }
 
         if (ingredienteCombo != null) {
+            ingredienteCombo.setEditable(true);
+            ingredienteCombo.setItems(ingredientiDisponibiliFiltered);
             ingredienteCombo.setConverter(new javafx.util.StringConverter<>() {
                 @Override
                 public String toString(Ingrediente ingrediente) {
@@ -228,7 +258,78 @@ public class GestioneSessioniPraticheBoundary {
 
                 @Override
                 public Ingrediente fromString(String string) {
+                    if (string == null) return null;
+                    String s = string.trim();
+                    if (s.isEmpty()) return null;
+
+                    // 1) match esatto sul testo visualizzato
+                    for (Ingrediente i : ingredientiDisponibiliMaster) {
+                        if (i == null) continue;
+                        String shown = toString(i);
+                        if (shown != null && shown.equals(s)) return i;
+                    }
+
+                    // 2) fallback: match per nome
+                    int parenIdx = s.indexOf('(');
+                    String name = parenIdx > 0 ? s.substring(0, parenIdx).trim() : s;
+                    for (Ingrediente i : ingredientiDisponibiliMaster) {
+                        if (i == null || i.getNome() == null) continue;
+                        if (i.getNome().equalsIgnoreCase(name)) return i;
+                    }
                     return null;
+                }
+            });
+
+            ingredienteCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                suppressIngredienteFilter = true;
+                try {
+                    // sincronizza l'editor con il valore selezionato
+                    if (ingredienteCombo.getEditor() != null) {
+                        ingredienteCombo.getEditor().setText(ingredienteCombo.getConverter().toString(newVal));
+                    }
+                } finally {
+                    suppressIngredienteFilter = false;
+                }
+            });
+
+            if (ingredienteCombo.getEditor() != null) {
+                ingredienteCombo.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
+                    if (suppressIngredienteFilter) return;
+                    Platform.runLater(() -> {
+                        if (suppressIngredienteFilter) return;
+
+                        // mostra i suggerimenti solo mentre l'utente sta effettivamente scrivendo nel campo
+                        if (ingredienteCombo.getEditor() == null || !ingredienteCombo.getEditor().isFocused()) {
+                            return;
+                        }
+
+                        Ingrediente selected = ingredienteCombo.getValue();
+                        if (selected != null) {
+                            String selectedText = ingredienteCombo.getConverter().toString(selected);
+                            if (selectedText != null && selectedText.equals(newVal)) {
+                                return;
+                            }
+                        }
+                        setIngredienteFilter(newVal);
+                        if (newVal != null && !newVal.trim().isEmpty() && !ingredienteCombo.isShowing()) {
+                            ingredienteCombo.show();
+                        }
+                    });
+                });
+
+                ingredienteCombo.getEditor().focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                    if (!isFocused && ingredienteCombo.isShowing()) {
+                        ingredienteCombo.hide();
+                    }
+                });
+            }
+        }
+
+        if (ingredienteQuantitaField != null && ingredienteCombo != null) {
+            ingredienteQuantitaField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (isFocused && ingredienteCombo.isShowing()) {
+                    ingredienteCombo.hide();
                 }
             });
         }
@@ -279,9 +380,25 @@ public class GestioneSessioniPraticheBoundary {
             ricetteCombo.getItems().setAll(GestoreRicette.getInstance().getRicetteDisponibili());
         }
         if (ingredienteCombo != null) {
-            ingredienteCombo.getItems().setAll(GestoreRicette.getInstance().getIngredientiDisponibili());
+            ingredientiDisponibiliMaster.setAll(GestoreRicette.getInstance().getIngredientiDisponibili());
+            setIngredienteFilter(ingredienteCombo.getEditor() != null ? ingredienteCombo.getEditor().getText() : null);
         }
         refreshRicetteSection();
+    }
+
+    private void setIngredienteFilter(String filterText) {
+        String filter = filterText != null ? filterText.trim() : "";
+        // se l'editor contiene "Nome (unità)", filtra solo per il nome
+        int parenIdx = filter.indexOf('(');
+        if (parenIdx > 0) {
+            filter = filter.substring(0, parenIdx).trim();
+        }
+        String filterLower = filter.toLowerCase();
+        ingredientiDisponibiliFiltered.setPredicate(i -> {
+            if (i == null || i.getNome() == null) return false;
+            if (filterLower.isEmpty()) return true;
+            return i.getNome().toLowerCase().contains(filterLower);
+        });
     }
 
     private void refreshRicetteSection() {
@@ -319,15 +436,17 @@ public class GestioneSessioniPraticheBoundary {
             if (enable) {
                 var ricette = GestoreRicette.getInstance().getRicettePerSessione(idSessione);
                 ricetteListView.setItems(javafx.collections.FXCollections.observableArrayList(ricette));
+
+                // Se c'è almeno una ricetta, seleziona la prima per rendere subito attivo "Dettagli ricetta"
+                if (!ricetteListView.getItems().isEmpty() && ricetteListView.getSelectionModel().getSelectedItem() == null) {
+                    ricetteListView.getSelectionModel().selectFirst();
+                }
             } else {
                 ricetteListView.setItems(javafx.collections.FXCollections.observableArrayList(new ArrayList<>()));
             }
         }
 
-        if (dettaglioRicettaButton != null) {
-            Ricetta selected = ricetteListView != null ? ricetteListView.getSelectionModel().getSelectedItem() : null;
-            dettaglioRicettaButton.setDisable(selected == null);
-        }
+        updateDettagliRicetteButtonState();
 
         if (ricetteListView != null) {
             boolean hasRicette = ricetteListView.getItems() != null && !ricetteListView.getItems().isEmpty();
@@ -353,6 +472,15 @@ public class GestioneSessioniPraticheBoundary {
             ingredientiListView.setVisible(hasIngredienti);
             ingredientiListView.setManaged(hasIngredienti);
         }
+    }
+
+    private void updateDettagliRicetteButtonState() {
+        if (dettaglioRicettaButton == null) return;
+
+        boolean hasSessione = sessioneSelezionata != null && sessioneSelezionata.getIdSessione() != null;
+        boolean hasRicette = ricetteListView != null && ricetteListView.getItems() != null && !ricetteListView.getItems().isEmpty();
+
+        dettaglioRicettaButton.setDisable(!(hasSessione && hasRicette));
     }
 
     private void aggiornaRicettePerSessione(List<SessionePresenza> sessioni) {
@@ -462,13 +590,16 @@ public class GestioneSessioniPraticheBoundary {
         }
         String nome = null;
         String unita = null;
-        if (ingredienteCombo != null && ingredienteCombo.getValue() != null) {
+        boolean usedExisting = ingredienteCombo != null && ingredienteCombo.getValue() != null;
+        if (usedExisting) {
             nome = ingredienteCombo.getValue().getNome();
             unita = ingredienteCombo.getValue().getUnitàDiMisura();
         }
+        boolean isNewIngredient = false;
         if ((nome == null || nome.isBlank()) && nuovoIngredienteNomeField != null) {
             nome = nuovoIngredienteNomeField.getText();
             unita = nuovoIngredienteUnitaField != null ? nuovoIngredienteUnitaField.getText() : null;
+            isNewIngredient = nome != null && !nome.isBlank();
         }
         String quantitaStr = ingredienteQuantitaField != null ? ingredienteQuantitaField.getText() : null;
 
@@ -476,9 +607,20 @@ public class GestioneSessioniPraticheBoundary {
             showRicettaWarning("Seleziona o inserisci un ingrediente.");
             return;
         }
-        if (unita == null || unita.isBlank()) {
-            showRicettaWarning("Inserisci l'unità di misura dell'ingrediente.");
+
+        // Validazione esplicita: un nuovo ingrediente richiede sempre l'unità di misura
+        if (isNewIngredient && (unita == null || unita.isBlank())) {
+            showRicettaWarning("Per un nuovo ingrediente devi inserire l'unità di misura.");
             return;
+        }
+        if (unita == null || unita.isBlank()) {
+            String fallbackUnita = nuovoIngredienteUnitaField != null ? nuovoIngredienteUnitaField.getText() : null;
+            if (fallbackUnita != null && !fallbackUnita.isBlank()) {
+                unita = fallbackUnita;
+            } else {
+                showRicettaWarning("Inserisci l'unità di misura dell'ingrediente.");
+                return;
+            }
         }
         if (quantitaStr == null || quantitaStr.isBlank()) {
             showRicettaWarning("Inserisci la quantità necessaria.");
@@ -498,11 +640,35 @@ public class GestioneSessioniPraticheBoundary {
         }
 
         ingredientiNuovaRicetta.add(new IngredienteQuantita(nome.trim(), unita.trim(), quantita));
-        boolean usedExisting = ingredienteCombo != null && ingredienteCombo.getValue() != null;
+
+        // se è un nuovo ingrediente (non preso dal combo), aggiungilo subito ai suggerimenti
+        if (!usedExisting) {
+            Ingrediente nuovo = new Ingrediente();
+            nuovo.setNome(nome.trim());
+            nuovo.setUnitàDiMisura(unita.trim());
+            boolean already = ingredientiDisponibiliMaster.stream().anyMatch(i -> i != null && i.getNome() != null
+                    && i.getNome().equalsIgnoreCase(nuovo.getNome()));
+            if (!already) {
+                ingredientiDisponibiliMaster.add(nuovo);
+            }
+        }
+
         if (ingredienteQuantitaField != null) ingredienteQuantitaField.clear();
         if (nuovoIngredienteNomeField != null) nuovoIngredienteNomeField.clear();
         if (nuovoIngredienteUnitaField != null) nuovoIngredienteUnitaField.clear();
-        if (!usedExisting && ingredienteCombo != null) ingredienteCombo.setValue(null);
+        if (ingredienteCombo != null) {
+            suppressIngredienteFilter = true;
+            try {
+                ingredienteCombo.setValue(null);
+                if (ingredienteCombo.getEditor() != null) {
+                    ingredienteCombo.getEditor().clear();
+                }
+                setIngredienteFilter(null);
+                ingredienteCombo.hide();
+            } finally {
+                suppressIngredienteFilter = false;
+            }
+        }
         if (ingredientiListView != null) {
             ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredientiNuovaRicetta));
         }
@@ -577,11 +743,11 @@ public class GestioneSessioniPraticheBoundary {
 
     @FXML
     private void onDettaglioRicettaClick(ActionEvent event) {
-        Ricetta selected = ricetteListView != null ? ricetteListView.getSelectionModel().getSelectedItem() : null;
-        if (selected == null) {
-            showRicettaWarning("Seleziona una ricetta dalla lista.");
+        if (sessioneSelezionata == null || sessioneSelezionata.getIdSessione() == null) {
+            showRicettaWarning("Seleziona una sessione valida.");
             return;
         }
+        Ricetta selected = ricetteListView != null ? ricetteListView.getSelectionModel().getSelectedItem() : null;
 
         try {
             java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/gestioneRicettaDettagli.fxml");
@@ -598,7 +764,7 @@ public class GestioneSessioniPraticheBoundary {
             Parent root = loader.load();
 
             GestioneRicettaDettagliBoundary controller = loader.getController();
-            controller.initData(selected, corso, chef);
+            controller.initDataSessione(sessioneSelezionata, selected, corso, chef);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));

@@ -125,4 +125,22 @@ public class CorsoDao {
         }
         return result;
     }
+
+    public List<String> findAllCategorieDistinct() throws SQLException {
+        String sql = "SELECT DISTINCT categoria FROM uninafoodlab.Categoria_Corso WHERE categoria IS NOT NULL AND TRIM(categoria) <> '' ORDER BY categoria";
+        List<String> result = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String cat = rs.getString("categoria");
+                if (cat != null) {
+                    String trimmed = cat.trim();
+                    if (!trimmed.isEmpty()) {
+                        result.add(trimmed);
+                    }
+                }
+            }
+        }
+        return result;
+    }
 }
