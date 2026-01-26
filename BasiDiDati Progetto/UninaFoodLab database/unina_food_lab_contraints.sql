@@ -1,6 +1,11 @@
+GRANT ALL ON SCHEMA uninafoodlab TO public;
+SET search_path TO uninafoodlab, public;
 -- =============================================================
 -- VINCOLI CHECK
 -- =============================================================
+
+GRANT ALL ON SCHEMA uninafoodlab TO public;
+SET search_path TO uninafoodlab, public;
 
 -- Ingrediente
 -- Nome e unità di misura con caratteri validi

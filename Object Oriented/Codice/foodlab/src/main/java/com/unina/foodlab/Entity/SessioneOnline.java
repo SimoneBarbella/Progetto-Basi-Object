@@ -1,6 +1,6 @@
 package com.unina.foodlab.Entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.unina.foodlab.Enum.TipoSessione;
 
@@ -12,7 +12,7 @@ public class SessioneOnline extends Sessione  {
 		super();
 	}
 
-	public SessioneOnline(LocalDate oraInizio,TipoSessione tipoSessione,String teoria) {
+	public SessioneOnline(LocalDateTime oraInizio,TipoSessione tipoSessione,String teoria) {
 		super(oraInizio,tipoSessione);
 		this.teoria=teoria;
 	}

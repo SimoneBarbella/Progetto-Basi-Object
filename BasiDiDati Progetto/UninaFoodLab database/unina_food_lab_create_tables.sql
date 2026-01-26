@@ -1,3 +1,6 @@
+GRANT ALL ON SCHEMA uninafoodlab TO public;
+SET search_path TO uninafoodlab, public;
+
 --- CREAZIONE TIPI ENUM ---
 CREATE TYPE tipo_utente_enum AS ENUM ('chef', 'studente', 'chefStudente');
 CREATE TYPE tipo_sessione_enum AS ENUM ('presenza', 'online');

@@ -6,6 +6,9 @@ public class Ingrediente {
 	private String unitàDiMisura;
 	
 	
+	public Ingrediente() {
+	}
+
 	public Ingrediente(String nome, String unitàDiMisura) {
 		this.nome = nome;
 		this.unitàDiMisura = unitàDiMisura;

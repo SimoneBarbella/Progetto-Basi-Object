@@ -1,6 +1,10 @@
+
 -- =============================================================
 -- TRIGGER
 -- =============================================================
+
+GRANT ALL ON SCHEMA uninafoodlab TO public;
+SET search_path TO uninafoodlab, public;
 
 -- Creazione del trigger: Aggiorna numero partecipanti Corso
 CREATE OR REPLACE FUNCTION aggiorna_partecipanti() RETURNS TRIGGER AS $$

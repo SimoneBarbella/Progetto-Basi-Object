@@ -1,6 +1,10 @@
+
 -- =============================================================
 -- Popolamento del Database
 -- =============================================================
+
+GRANT ALL ON SCHEMA uninafoodlab TO public;
+SET search_path TO uninafoodlab, public;
 
 BEGIN;
 
@@ -77,7 +81,7 @@ INSERT INTO Utente (email, nome, cognome, password, matricola, tipo_utente)
 VALUES ('matilde.std@unina.it', 'Matilde', 'Esposito', 'Studente6!', 'N86006', 'studente');
 -- Chef
 INSERT INTO Utente (email, nome, cognome, password, tipo_utente) 
-VALUES ('chef.cannav@email.it', 'Antonino', 'Cannav', 'ChefTop1!', 'chef');
+VALUES ('chef.cannav@email.it', 'Antonino', 'Cannavacciulo', 'ChefTop1!', 'chef');
 INSERT INTO Specializzazione_Chef VALUES ('chef.cannav@email.it', 'Cucina Partenopea'), 
 ('chef.cannav@email.it','Cucina Italiana'), ('chef.cannav@email.it','Pizze e Focacce');
 INSERT INTO Utente (email, nome, cognome, password, tipo_utente)

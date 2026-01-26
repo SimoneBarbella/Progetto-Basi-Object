@@ -1,5 +1,6 @@
 package com.unina.foodlab.Entity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ public class Corso {
 
 	
 	private String idCorso;
+	private LocalDate dataInizio;
 	private String nome;
 	private String frequenza; 
 	private int numPartecipanti;
@@ -14,11 +16,13 @@ public class Corso {
 	private List<Studente> studenti;
 	private List<Chef> chefs;
 	private List<Sessione> sessioni;
+	private List<String> categorie;
 	
 	public Corso() {
 		this.chefs=new ArrayList<>();
 		this.studenti=new ArrayList<>();
 		this.sessioni=new ArrayList<>();
+		this.categorie = new ArrayList<>();
 	}
 	
 	public Corso(String idCorso, String nome, String frequenza, int numPartecipanti, int numSessioni) {
@@ -32,6 +36,19 @@ public class Corso {
 		this.sessioni=new ArrayList<>();
 	}
 
+	public Corso(String idCorso, LocalDate dataInizio, String nome, String frequenza, int numPartecipanti, int numSessioni) {
+		this.idCorso = idCorso;
+		this.dataInizio = dataInizio;
+		this.nome = nome;
+		this.frequenza = frequenza;
+		this.numPartecipanti = numPartecipanti;
+		this.numSessioni = numSessioni;
+		this.chefs=new ArrayList<>();
+		this.studenti=new ArrayList<>();
+		this.sessioni=new ArrayList<>();
+		this.categorie = new ArrayList<>();
+	}
+
 
 	public String getIdCorso() {
 		return idCorso;
@@ -40,6 +57,14 @@ public class Corso {
 
 	public void setIdCorso(String idCorso) {
 		this.idCorso = idCorso;
+	}
+
+	public LocalDate getDataInizio() {
+		return dataInizio;
+	}
+
+	public void setDataInizio(LocalDate dataInizio) {
+		this.dataInizio = dataInizio;
 	}
 
 
@@ -105,6 +130,14 @@ public class Corso {
 	public void setSessioni(List<Sessione> sessioni) {
 		this.sessioni = sessioni;
 	}
+
+    public List<String> getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(List<String> categorie) {
+        this.categorie = categorie;
+    }
 	
 	
 	

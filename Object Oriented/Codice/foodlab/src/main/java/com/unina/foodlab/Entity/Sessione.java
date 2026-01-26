@@ -1,12 +1,13 @@
 package com.unina.foodlab.Entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.unina.foodlab.Enum.TipoSessione;
 
 public class Sessione {
-	
-	private LocalDate oraInizio;
+
+	private Integer idSessione;
+	private LocalDateTime oraInizio;
 	private TipoSessione tipoSessione;
 	private Corso corso;
 	
@@ -16,16 +17,24 @@ public class Sessione {
 		
 	}
 	
-	public Sessione(LocalDate oraInizio, TipoSessione tipoSessione) {
+	public Sessione(LocalDateTime oraInizio, TipoSessione tipoSessione) {
 		this.oraInizio = oraInizio;
 		this.tipoSessione=tipoSessione;
 	}
 
-	public LocalDate getOraInizio() {
+	public Integer getIdSessione() {
+		return idSessione;
+	}
+
+	public void setIdSessione(Integer idSessione) {
+		this.idSessione = idSessione;
+	}
+
+	public LocalDateTime getOraInizio() {
 		return oraInizio;
 	}
 
-	public void setOraInizio(LocalDate oraInizio) {
+	public void setOraInizio(LocalDateTime oraInizio) {
 		this.oraInizio = oraInizio;
 	}
 

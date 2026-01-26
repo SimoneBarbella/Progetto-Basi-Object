@@ -1,15 +1,22 @@
 package com.unina.foodlab.Boundary;
 
-import com.unina.foodlab.Control.GestoreAutenticazione;
+import com.unina.foodlab.Controller.GestoreAutenticazione;
 import com.unina.foodlab.Entity.Chef;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class LoginBoundary {
 
@@ -41,8 +48,9 @@ public class LoginBoundary {
             errorLabel.setText("Verifica credenziali...");
         }
 
+        Chef chef = null;
         try {
-            Chef chef = GestoreAutenticazione.getInstance().loginChef(email, password);
+            chef = GestoreAutenticazione.getInstance().loginChef(email, password);
             if (chef == null) {
                 if (errorLabel != null) {
                     errorLabel.setTextFill(Color.web("#d32f2f"));
@@ -98,7 +106,41 @@ public class LoginBoundary {
             alert.showAndWait();
         }
 
-        // TODO: qui puoi cambiare scena (Scene/Stage) verso la schermata successiva.
+        if (chef == null) {
+            return;
+        }
+
+        try {
+            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/home.fxml");
+            if (location == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Home");
+                alert.setHeaderText("Errore apertura Home");
+                alert.setContentText("Risorsa home.fxml non trovata nel classpath.");
+                alert.showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(location);
+            Parent root = loader.load();
+
+            HomeBoundary controller = loader.getController();
+            controller.initData(chef);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("[LoginBoundary] Errore caricamento home.fxml: " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Home");
+            alert.setHeaderText("Errore apertura Home");
+            alert.setContentText("Impossibile caricare la schermata Home: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     @FXML

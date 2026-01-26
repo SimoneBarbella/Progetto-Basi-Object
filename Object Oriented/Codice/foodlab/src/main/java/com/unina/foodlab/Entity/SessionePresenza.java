@@ -1,6 +1,6 @@
 package com.unina.foodlab.Entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class SessionePresenza extends Sessione{
 		
 	}
 	
-	public SessionePresenza(LocalDate oraInizio,TipoSessione tipoSessione,int numAderenti, double quantitàTotale) {
+	public SessionePresenza(LocalDateTime oraInizio,TipoSessione tipoSessione,int numAderenti, double quantitàTotale) {
 		super(oraInizio,tipoSessione);
 		this.numAderenti=numAderenti;
 		this.quantitàTotale= quantitàTotale;

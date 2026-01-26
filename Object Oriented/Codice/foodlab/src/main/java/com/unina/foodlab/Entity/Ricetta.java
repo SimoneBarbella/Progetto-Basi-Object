@@ -1,14 +1,15 @@
 package com.unina.foodlab.Entity;
 
-import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Ricetta {
-	
+
+	private Integer idRicetta;
 	private String nome;
 	private String descrizione;
-	private LocalDate tempo;
+	private LocalTime tempo;
 	private List<Ingrediente> ingredienti;
 	private List<SessionePresenza> sessioniPresenza;
 	
@@ -18,13 +19,21 @@ public class Ricetta {
 		this.sessioniPresenza = new ArrayList<>();
 	}
 	
-	public Ricetta(String nome, String descrizione, LocalDate tempo) {
+	public Ricetta(String nome, String descrizione, LocalTime tempo) {
 		this.nome = nome;
 		this.descrizione = descrizione;
 		this.tempo = tempo;
 		this.ingredienti = new ArrayList<>();
 		this.sessioniPresenza = new ArrayList<>();
 	
+	}
+
+	public Integer getIdRicetta() {
+		return idRicetta;
+	}
+
+	public void setIdRicetta(Integer idRicetta) {
+		this.idRicetta = idRicetta;
 	}
 	
 	public String getNome() {
@@ -39,10 +48,10 @@ public class Ricetta {
 	public void setDescrizione(String descrizione) {
 		this.descrizione = descrizione;
 	}
-	public LocalDate getTempo() {
+	public LocalTime getTempo() {
 		return tempo;
 	}
-	public void setTempo(LocalDate tempo) {
+	public void setTempo(LocalTime tempo) {
 		this.tempo = tempo;
 	}
 
