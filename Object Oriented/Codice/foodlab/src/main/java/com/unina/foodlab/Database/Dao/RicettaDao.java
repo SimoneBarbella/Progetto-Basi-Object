@@ -92,6 +92,15 @@ public class RicettaDao {
         }
     }
 
+    public void unlinkRicettaFromSessione(int idSessione, int idRicetta) throws SQLException {
+        String sql = "DELETE FROM Prepara WHERE id_sessione = ? AND id_ricetta = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idSessione);
+            ps.setInt(2, idRicetta);
+            ps.executeUpdate();
+        }
+    }
+
     public void addRichiede(int idRicetta, String nomeIngrediente, BigDecimal quantita) throws SQLException {
         String sql = "INSERT INTO Richiede(id_ricetta, nome_ingrediente, quantita_necessaria) VALUES (?, ?, ?) "
                 + "ON CONFLICT (id_ricetta, nome_ingrediente) DO UPDATE SET quantita_necessaria = EXCLUDED.quantita_necessaria";

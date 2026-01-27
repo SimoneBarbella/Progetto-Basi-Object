@@ -3,13 +3,13 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
@@ -50,30 +50,40 @@
             <Button fx:id="dettaglioRicettaButton" text="Dettagli ricette" onAction="#onDettaglioRicettaClick" styleClass="secondary-button" disable="true" />
         </HBox>
 
-        <HBox alignment="CENTER_LEFT" spacing="12">
-            <ComboBox fx:id="ricetteCombo" promptText="Ricetta esistente" prefWidth="220" />
-            <Button fx:id="aggiungiRicettaButton" text="Aggiungi ricetta" onAction="#onAddRicettaClick" styleClass="secondary-button" />
+        <HBox spacing="18" maxWidth="920">
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="Ricette" styleClass="section-title" />
+
+                <HBox alignment="TOP_LEFT" spacing="12">
+                    <TextField fx:id="nuovaRicettaNomeField" promptText="Nome ricetta (suggerimenti)" prefWidth="200" />
+                    <TextArea fx:id="nuovaRicettaDescrField" promptText="Descrizione" prefWidth="320" prefHeight="70" wrapText="true" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <TextField fx:id="nuovaRicettaTempoField" promptText="Tempo (HH:mm:ss)" prefWidth="160" />
+                    <Button fx:id="creaRicettaButton" text="Aggiungi ricetta" onAction="#onCreateRicettaClick" styleClass="secondary-button" />
+                </HBox>
+
+                <Label fx:id="sessioneSelezionataLabel" text="Ricette della sessione" styleClass="section-title" />
+                <ListView fx:id="ricetteListView" prefHeight="200" VBox.vgrow="ALWAYS" />
+            </VBox>
+
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="Ingredienti" styleClass="section-title" />
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <TextField fx:id="nuovoIngredienteNomeField" promptText="Ingrediente (suggerimenti)" prefWidth="220" />
+                    <TextField fx:id="nuovoIngredienteUnitaField" promptText="Unità di misura" prefWidth="150" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <TextField fx:id="ingredienteQuantitaField" promptText="Quantità" prefWidth="120" />
+                    <Button fx:id="aggiungiIngredienteButton" text="Aggiungi ingrediente" onAction="#onAddIngredienteClick" styleClass="secondary-button" />
+                </HBox>
+
+                <ListView fx:id="ingredientiListView" prefHeight="200" VBox.vgrow="ALWAYS" />
+            </VBox>
         </HBox>
-
-        <HBox alignment="CENTER_LEFT" spacing="12">
-            <TextField fx:id="nuovaRicettaNomeField" promptText="Nome ricetta" />
-            <TextArea fx:id="nuovaRicettaDescrField" promptText="Descrizione" prefWidth="320" prefHeight="70" wrapText="true" />
-            <TextField fx:id="nuovaRicettaTempoField" promptText="Tempo (HH:mm:ss)" />
-            <Button fx:id="creaRicettaButton" text="Crea e aggiungi" onAction="#onCreateRicettaClick" styleClass="secondary-button" />
-        </HBox>
-
-        <HBox alignment="CENTER_LEFT" spacing="12">
-            <ComboBox fx:id="ingredienteCombo" promptText="Ingrediente esistente" prefWidth="200" />
-            <TextField fx:id="nuovoIngredienteNomeField" promptText="Nuovo ingrediente" />
-            <TextField fx:id="nuovoIngredienteUnitaField" promptText="Unità di misura" />
-            <TextField fx:id="ingredienteQuantitaField" promptText="Quantità" />
-            <Button fx:id="aggiungiIngredienteButton" text="Aggiungi ingrediente" onAction="#onAddIngredienteClick" styleClass="secondary-button" />
-        </HBox>
-
-        <ListView fx:id="ingredientiListView" prefHeight="110" />
-
-        <Label fx:id="sessioneSelezionataLabel" text="Ricette della sessione" styleClass="section-title" />
-        <ListView fx:id="ricetteListView" prefHeight="120" />
 
         <HBox alignment="CENTER_RIGHT" spacing="10">
             <Button text="Indietro" onAction="#onBackClick" styleClass="back-button" />

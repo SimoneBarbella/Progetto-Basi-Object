@@ -223,4 +223,74 @@ public class HomeBoundary {
             alert.showAndWait();
         }
     }
+
+    @FXML
+    private void onReportClick(ActionEvent event) {
+        try {
+            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/report.fxml");
+            if (location == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Report");
+                alert.setHeaderText("Schermata non trovata");
+                alert.setContentText("Risorsa report.fxml non trovata nel classpath.");
+                alert.showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(location);
+            Parent root = loader.load();
+
+            ReportBoundary controller = loader.getController();
+            controller.initData(chef);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("[HomeBoundary] Errore apertura report.fxml: " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Report");
+            alert.setHeaderText("Errore apertura schermata");
+            alert.setContentText("Impossibile aprire la schermata Report: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    private void onNotificheClick(ActionEvent event) {
+        try {
+            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/notifiche.fxml");
+            if (location == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Notifiche");
+                alert.setHeaderText("Schermata non trovata");
+                alert.setContentText("Risorsa notifiche.fxml non trovata nel classpath.");
+                alert.showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(location);
+            Parent root = loader.load();
+
+            NotificheBoundary controller = loader.getController();
+            controller.initData(chef);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("[HomeBoundary] Errore apertura notifiche.fxml: " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Notifiche");
+            alert.setHeaderText("Errore apertura schermata");
+            alert.setContentText("Impossibile aprire la schermata Notifiche: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
 }

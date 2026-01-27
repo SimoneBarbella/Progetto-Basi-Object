@@ -52,6 +52,17 @@ CREATE TABLE Ricetta (
     tempo TIME NOT NULL
 );
 
+CREATE TABLE Notifica (
+    id_notifica INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    messaggio TEXT NOT NULL,
+    data_invio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    email_chef VARCHAR(255) NOT NULL,
+    id_corso INTEGER, -- Se NULL, si intende "A tutti i corsi"
+    
+    FOREIGN KEY (email_chef) REFERENCES Utente(email) ON DELETE CASCADE,
+    FOREIGN KEY (id_corso) REFERENCES Corso(id_corso) ON DELETE CASCADE
+);
+
 ---- Gestione dei multivalori ----
 -- Creazione della tabella SPECIALIZZAZIONE_CHEF (1:N)
 CREATE TABLE Specializzazione_Chef (

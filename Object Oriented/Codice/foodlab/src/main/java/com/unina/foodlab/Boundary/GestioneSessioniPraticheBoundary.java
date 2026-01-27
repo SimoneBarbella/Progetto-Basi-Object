@@ -18,16 +18,20 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.geometry.Side;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import javafx.application.Platform;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -65,9 +69,6 @@ public class GestioneSessioniPraticheBoundary {
     private Label sessioneSelezionataLabel;
 
     @FXML
-    private ComboBox<Ricetta> ricetteCombo;
-
-    @FXML
     private TextField nuovaRicettaNomeField;
 
     @FXML
@@ -77,9 +78,6 @@ public class GestioneSessioniPraticheBoundary {
     private TextField nuovaRicettaTempoField;
 
     @FXML
-    private ComboBox<Ingrediente> ingredienteCombo;
-
-    @FXML
     private TextField nuovoIngredienteNomeField;
 
     @FXML
@@ -87,9 +85,6 @@ public class GestioneSessioniPraticheBoundary {
 
     @FXML
     private TextField ingredienteQuantitaField;
-
-    @FXML
-    private javafx.scene.control.Button aggiungiRicettaButton;
 
     @FXML
     private javafx.scene.control.Button creaRicettaButton;
@@ -113,11 +108,16 @@ public class GestioneSessioniPraticheBoundary {
     private Chef chef;
     private SessionePresenza sessioneSelezionata;
 
-        private final javafx.collections.ObservableList<Ingrediente> ingredientiDisponibiliMaster =
+    private final javafx.collections.ObservableList<Ricetta> ricetteDisponibiliMaster =
             javafx.collections.FXCollections.observableArrayList();
-        private final javafx.collections.transformation.FilteredList<Ingrediente> ingredientiDisponibiliFiltered =
-            new javafx.collections.transformation.FilteredList<>(ingredientiDisponibiliMaster, i -> true);
-        private boolean suppressIngredienteFilter = false;
+    private final javafx.collections.ObservableList<Ingrediente> ingredientiDisponibiliMaster =
+            javafx.collections.FXCollections.observableArrayList();
+
+    private final ContextMenu nuoveRicetteSuggestMenu = new ContextMenu();
+    private final ContextMenu ingredientiSuggestMenu = new ContextMenu();
+
+    private Ricetta ricettaSelezionataNuovaSuggest = null;
+    private Ingrediente ingredienteSelezionatoSuggest = null;
 
     private final List<IngredienteQuantita> ingredientiNuovaRicetta = new ArrayList<>();
     private final Map<Integer, String> ricettePerSessione = new HashMap<>();
@@ -189,37 +189,8 @@ public class GestioneSessioniPraticheBoundary {
             sessioniTable.setOnMouseClicked(e -> refreshRicetteSection());
         }
 
-        if (ricetteCombo != null) {
-            ricetteCombo.setConverter(new javafx.util.StringConverter<>() {
-                @Override
-                public String toString(Ricetta ricetta) {
-                    if (ricetta == null) return "";
-                    String tempo = ricetta.getTempo() != null ? ricetta.getTempo().toString() : "";
-                    return ricetta.getNome() + (tempo.isEmpty() ? "" : " (" + tempo + ")");
-                }
-
-                @Override
-                public Ricetta fromString(String string) {
-                    if (string == null) return null;
-                    String s = string.trim();
-                    if (s.isEmpty()) return null;
-                    // prova match esatto sul testo mostrato
-                    for (Ricetta r : ricetteCombo.getItems()) {
-                        if (r == null) continue;
-                        String shown = toString(r);
-                        if (shown != null && shown.equals(s)) return r;
-                    }
-                    // fallback: match per nome 
-                    int parenIdx = s.indexOf('(');
-                    String name = parenIdx > 0 ? s.substring(0, parenIdx).trim() : s;
-                    for (Ricetta r : ricetteCombo.getItems()) {
-                        if (r == null || r.getNome() == null) continue;
-                        if (r.getNome().equalsIgnoreCase(name)) return r;
-                    }
-                    return null;
-                }
-            });
-        }
+        setupNuovaRicettaSuggest();
+        setupIngredienteSuggest();
 
         if (ricetteListView != null) {
             ricetteListView.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
@@ -228,9 +199,35 @@ public class GestioneSessioniPraticheBoundary {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
                         setText(null);
+                        setGraphic(null);
                     } else {
-                        String tempo = item.getTempo() != null ? item.getTempo().toString() : "";
-                        setText(item.getNome() + (tempo.isEmpty() ? "" : " (" + tempo + ")"));
+                        String labelText = displayRicetta(item);
+
+                        Label lbl = new Label(labelText);
+
+                        Region spacer = new Region();
+                        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                        Button removeBtn = new Button("x");
+                        removeBtn.getStyleClass().add("secondary-button");
+                        removeBtn.setFocusTraversable(false);
+                        removeBtn.setOnAction(e -> {
+                            if (sessioneSelezionata == null || sessioneSelezionata.getIdSessione() == null
+                                    || item.getIdRicetta() == null) {
+                                return;
+                            }
+                            try {
+                                GestoreRicette.getInstance().disassociaRicettaSessione(
+                                        sessioneSelezionata.getIdSessione(), item.getIdRicetta());
+                                loadSessioniPratiche();
+                            } catch (RuntimeException ex) {
+                                showRicettaError(ex.getMessage());
+                            }
+                        });
+
+                        HBox row = new HBox(10, lbl, spacer, removeBtn);
+                        setText(null);
+                        setGraphic(row);
                     }
                 }
             });
@@ -245,91 +242,11 @@ public class GestioneSessioniPraticheBoundary {
             });
         }
 
-        if (ingredienteCombo != null) {
-            ingredienteCombo.setEditable(true);
-            ingredienteCombo.setItems(ingredientiDisponibiliFiltered);
-            ingredienteCombo.setConverter(new javafx.util.StringConverter<>() {
-                @Override
-                public String toString(Ingrediente ingrediente) {
-                    if (ingrediente == null) return "";
-                    String unita = ingrediente.getUnitàDiMisura() != null ? ingrediente.getUnitàDiMisura() : "";
-                    return ingrediente.getNome() + (unita.isEmpty() ? "" : " (" + unita + ")");
-                }
 
-                @Override
-                public Ingrediente fromString(String string) {
-                    if (string == null) return null;
-                    String s = string.trim();
-                    if (s.isEmpty()) return null;
-
-                    // 1) match esatto sul testo visualizzato
-                    for (Ingrediente i : ingredientiDisponibiliMaster) {
-                        if (i == null) continue;
-                        String shown = toString(i);
-                        if (shown != null && shown.equals(s)) return i;
-                    }
-
-                    // 2) fallback: match per nome
-                    int parenIdx = s.indexOf('(');
-                    String name = parenIdx > 0 ? s.substring(0, parenIdx).trim() : s;
-                    for (Ingrediente i : ingredientiDisponibiliMaster) {
-                        if (i == null || i.getNome() == null) continue;
-                        if (i.getNome().equalsIgnoreCase(name)) return i;
-                    }
-                    return null;
-                }
-            });
-
-            ingredienteCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal == null) return;
-                suppressIngredienteFilter = true;
-                try {
-                    // sincronizza l'editor con il valore selezionato
-                    if (ingredienteCombo.getEditor() != null) {
-                        ingredienteCombo.getEditor().setText(ingredienteCombo.getConverter().toString(newVal));
-                    }
-                } finally {
-                    suppressIngredienteFilter = false;
-                }
-            });
-
-            if (ingredienteCombo.getEditor() != null) {
-                ingredienteCombo.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
-                    if (suppressIngredienteFilter) return;
-                    Platform.runLater(() -> {
-                        if (suppressIngredienteFilter) return;
-
-                        // mostra i suggerimenti solo mentre l'utente sta effettivamente scrivendo nel campo
-                        if (ingredienteCombo.getEditor() == null || !ingredienteCombo.getEditor().isFocused()) {
-                            return;
-                        }
-
-                        Ingrediente selected = ingredienteCombo.getValue();
-                        if (selected != null) {
-                            String selectedText = ingredienteCombo.getConverter().toString(selected);
-                            if (selectedText != null && selectedText.equals(newVal)) {
-                                return;
-                            }
-                        }
-                        setIngredienteFilter(newVal);
-                        if (newVal != null && !newVal.trim().isEmpty() && !ingredienteCombo.isShowing()) {
-                            ingredienteCombo.show();
-                        }
-                    });
-                });
-
-                ingredienteCombo.getEditor().focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                    if (!isFocused && ingredienteCombo.isShowing()) {
-                        ingredienteCombo.hide();
-                    }
-                });
-            }
-        }
-
-        if (ingredienteQuantitaField != null && ingredienteCombo != null) {
+        if (ingredienteQuantitaField != null) {
             ingredienteQuantitaField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (isFocused && ingredienteCombo.isShowing()) {
-                    ingredienteCombo.hide();
+                if (isFocused && ingredientiSuggestMenu.isShowing()) {
+                    ingredientiSuggestMenu.hide();
                 }
             });
         }
@@ -341,9 +258,30 @@ public class GestioneSessioniPraticheBoundary {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
                         setText(null);
+                        setGraphic(null);
                     } else {
                         String unita = item.getUnita() != null ? item.getUnita() : "";
-                        setText(item.getNome() + " - " + item.getQuantita() + (unita.isEmpty() ? "" : (" " + unita)));
+                        Label lbl = new Label(item.getNome() + " - " + item.getQuantita() + (unita.isEmpty() ? "" : (" " + unita)));
+
+                        Region spacer = new Region();
+                        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                        Button removeBtn = new Button("x");
+                        removeBtn.getStyleClass().add("secondary-button");
+                        removeBtn.setFocusTraversable(false);
+                        removeBtn.setOnAction(e -> {
+                            ingredientiNuovaRicetta.remove(item);
+                            if (ingredientiListView != null) {
+                                ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredientiNuovaRicetta));
+                                boolean hasIngredienti = !ingredientiNuovaRicetta.isEmpty();
+                                ingredientiListView.setVisible(hasIngredienti);
+                                ingredientiListView.setManaged(hasIngredienti);
+                            }
+                        });
+
+                        HBox row = new HBox(10, lbl, spacer, removeBtn);
+                        setText(null);
+                        setGraphic(row);
                     }
                 }
             });
@@ -363,6 +301,9 @@ public class GestioneSessioniPraticheBoundary {
 
     private void loadSessioniPratiche() {
         if (corso == null) return;
+
+        Integer previousSelectedSessionId = sessioneSelezionata != null ? sessioneSelezionata.getIdSessione() : null;
+
         List<Sessione> sessioni = GestoreSessioni.getInstance().getSessioniByCorso(corso);
         List<SessionePresenza> pratiche = sessioni.stream()
                 .filter(s -> s instanceof SessionePresenza)
@@ -371,34 +312,27 @@ public class GestioneSessioniPraticheBoundary {
         if (sessioniTable != null) {
             sessioniTable.setItems(javafx.collections.FXCollections.observableArrayList(pratiche));
             if (!pratiche.isEmpty()) {
-                sessioniTable.getSelectionModel().selectFirst();
+                boolean restored = false;
+                if (previousSelectedSessionId != null) {
+                    for (SessionePresenza s : pratiche) {
+                        if (s != null && s.getIdSessione() != null && s.getIdSessione().equals(previousSelectedSessionId)) {
+                            sessioniTable.getSelectionModel().select(s);
+                            restored = true;
+                            break;
+                        }
+                    }
+                }
+                if (!restored) {
+                    sessioniTable.getSelectionModel().selectFirst();
+                }
             }
         }
         aggiornaRicettePerSessione(pratiche);
         aggiornaQuantitaTotalePerSessione(pratiche);
-        if (ricetteCombo != null) {
-            ricetteCombo.getItems().setAll(GestoreRicette.getInstance().getRicetteDisponibili());
-        }
-        if (ingredienteCombo != null) {
-            ingredientiDisponibiliMaster.setAll(GestoreRicette.getInstance().getIngredientiDisponibili());
-            setIngredienteFilter(ingredienteCombo.getEditor() != null ? ingredienteCombo.getEditor().getText() : null);
-        }
-        refreshRicetteSection();
-    }
 
-    private void setIngredienteFilter(String filterText) {
-        String filter = filterText != null ? filterText.trim() : "";
-        // se l'editor contiene "Nome (unità)", filtra solo per il nome
-        int parenIdx = filter.indexOf('(');
-        if (parenIdx > 0) {
-            filter = filter.substring(0, parenIdx).trim();
-        }
-        String filterLower = filter.toLowerCase();
-        ingredientiDisponibiliFiltered.setPredicate(i -> {
-            if (i == null || i.getNome() == null) return false;
-            if (filterLower.isEmpty()) return true;
-            return i.getNome().toLowerCase().contains(filterLower);
-        });
+        ricetteDisponibiliMaster.setAll(GestoreRicette.getInstance().getRicetteDisponibili());
+        ingredientiDisponibiliMaster.setAll(GestoreRicette.getInstance().getIngredientiDisponibili());
+        refreshRicetteSection();
     }
 
     private void refreshRicetteSection() {
@@ -420,7 +354,6 @@ public class GestioneSessioniPraticheBoundary {
         }
 
         boolean enable = idSessione > 0;
-        if (aggiungiRicettaButton != null) aggiungiRicettaButton.setDisable(!enable);
         if (creaRicettaButton != null) creaRicettaButton.setDisable(!enable);
         if (aggiungiIngredienteButton != null) aggiungiIngredienteButton.setDisable(!enable);
         if (nuovaRicettaNomeField != null) nuovaRicettaNomeField.setDisable(!enable);
@@ -429,8 +362,8 @@ public class GestioneSessioniPraticheBoundary {
         if (nuovoIngredienteNomeField != null) nuovoIngredienteNomeField.setDisable(!enable);
         if (nuovoIngredienteUnitaField != null) nuovoIngredienteUnitaField.setDisable(!enable);
         if (ingredienteQuantitaField != null) ingredienteQuantitaField.setDisable(!enable);
-        if (ricetteCombo != null) ricetteCombo.setDisable(!enable);
-        if (ingredienteCombo != null) ingredienteCombo.setDisable(!enable);
+
+        applyRicettaMode(enable);
 
         if (ricetteListView != null) {
             if (enable) {
@@ -510,32 +443,35 @@ public class GestioneSessioniPraticheBoundary {
     }
 
     @FXML
-    private void onAddRicettaClick(ActionEvent event) {
-        if (sessioneSelezionata == null || sessioneSelezionata.getIdSessione() == null) {
-            showRicettaWarning("Seleziona una sessione valida.");
-            return;
-        }
-        Ricetta selected = ricetteCombo != null ? ricetteCombo.getValue() : null;
-        if (selected == null || selected.getIdRicetta() == null) {
-            showRicettaWarning("Seleziona una ricetta esistente.");
-            return;
-        }
-
-        try {
-            GestoreRicette.getInstance().associaRicettaSessione(sessioneSelezionata.getIdSessione(), selected.getIdRicetta());
-            loadSessioniPratiche();
-        } catch (RuntimeException ex) {
-            showRicettaError(ex.getMessage());
-        }
-    }
-
-    @FXML
     private void onCreateRicettaClick(ActionEvent event) {
         if (sessioneSelezionata == null || sessioneSelezionata.getIdSessione() == null) {
             showRicettaWarning("Seleziona una sessione valida.");
             return;
         }
         String nome = nuovaRicettaNomeField != null ? nuovaRicettaNomeField.getText() : null;
+
+        // Se l'utente ha selezionato (o digitato) una ricetta già esistente, gestiscila come "Aggiungi ricetta"
+        Ricetta ricettaEsistente = ricettaSelezionataNuovaSuggest;
+        if (ricettaEsistente == null && nome != null && !nome.isBlank()) {
+            ricettaEsistente = resolveRicetta(nome);
+        }
+        if (ricettaEsistente != null && ricettaEsistente.getIdRicetta() != null) {
+            try {
+                GestoreRicette.getInstance().associaRicettaSessione(sessioneSelezionata.getIdSessione(), ricettaEsistente.getIdRicetta());
+                if (nuovaRicettaNomeField != null) nuovaRicettaNomeField.clear();
+                if (nuovaRicettaDescrField != null) nuovaRicettaDescrField.clear();
+                if (nuovaRicettaTempoField != null) nuovaRicettaTempoField.clear();
+                if (nuovaRicettaDescrField != null) nuovaRicettaDescrField.setDisable(false);
+                if (nuovaRicettaTempoField != null) nuovaRicettaTempoField.setDisable(false);
+                ricettaSelezionataNuovaSuggest = null;
+                if (nuoveRicetteSuggestMenu.isShowing()) nuoveRicetteSuggestMenu.hide();
+                loadSessioniPratiche();
+            } catch (RuntimeException ex) {
+                showRicettaError(ex.getMessage());
+            }
+            return;
+        }
+
         String descr = nuovaRicettaDescrField != null ? nuovaRicettaDescrField.getText() : null;
         String tempoStr = nuovaRicettaTempoField != null ? nuovaRicettaTempoField.getText() : null;
 
@@ -588,19 +524,11 @@ public class GestioneSessioniPraticheBoundary {
             showRicettaWarning("Seleziona una sessione valida.");
             return;
         }
-        String nome = null;
-        String unita = null;
-        boolean usedExisting = ingredienteCombo != null && ingredienteCombo.getValue() != null;
-        if (usedExisting) {
-            nome = ingredienteCombo.getValue().getNome();
-            unita = ingredienteCombo.getValue().getUnitàDiMisura();
-        }
-        boolean isNewIngredient = false;
-        if ((nome == null || nome.isBlank()) && nuovoIngredienteNomeField != null) {
-            nome = nuovoIngredienteNomeField.getText();
-            unita = nuovoIngredienteUnitaField != null ? nuovoIngredienteUnitaField.getText() : null;
-            isNewIngredient = nome != null && !nome.isBlank();
-        }
+        String nome = nuovoIngredienteNomeField != null ? nuovoIngredienteNomeField.getText() : null;
+        Ingrediente existing = resolveIngrediente(nome);
+        boolean usedExisting = existing != null;
+        String unita = usedExisting ? existing.getUnitàDiMisura() : (nuovoIngredienteUnitaField != null ? nuovoIngredienteUnitaField.getText() : null);
+        boolean isNewIngredient = !usedExisting && nome != null && !nome.isBlank();
         String quantitaStr = ingredienteQuantitaField != null ? ingredienteQuantitaField.getText() : null;
 
         if (nome == null || nome.isBlank()) {
@@ -656,19 +584,9 @@ public class GestioneSessioniPraticheBoundary {
         if (ingredienteQuantitaField != null) ingredienteQuantitaField.clear();
         if (nuovoIngredienteNomeField != null) nuovoIngredienteNomeField.clear();
         if (nuovoIngredienteUnitaField != null) nuovoIngredienteUnitaField.clear();
-        if (ingredienteCombo != null) {
-            suppressIngredienteFilter = true;
-            try {
-                ingredienteCombo.setValue(null);
-                if (ingredienteCombo.getEditor() != null) {
-                    ingredienteCombo.getEditor().clear();
-                }
-                setIngredienteFilter(null);
-                ingredienteCombo.hide();
-            } finally {
-                suppressIngredienteFilter = false;
-            }
-        }
+        ingredienteSelezionatoSuggest = null;
+        if (nuovoIngredienteUnitaField != null) nuovoIngredienteUnitaField.setDisable(false);
+        if (ingredientiSuggestMenu.isShowing()) ingredientiSuggestMenu.hide();
         if (ingredientiListView != null) {
             ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredientiNuovaRicetta));
         }
@@ -678,6 +596,241 @@ public class GestioneSessioniPraticheBoundary {
             ingredientiListView.setVisible(hasIngredienti);
             ingredientiListView.setManaged(hasIngredienti);
         }
+    }
+
+    private void setupNuovaRicettaSuggest() {
+        if (nuovaRicettaNomeField == null) return;
+
+        nuovaRicettaNomeField.textProperty().addListener((obs, oldVal, newVal) -> {
+            ricettaSelezionataNuovaSuggest = null;
+            updateNuovaRicettaSuggestions(newVal);
+            applyRicettaMode(sessioneSelezionata != null && sessioneSelezionata.getIdSessione() != null);
+        });
+
+        nuovaRicettaNomeField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && nuoveRicetteSuggestMenu.isShowing()) {
+                nuoveRicetteSuggestMenu.hide();
+            }
+        });
+
+        nuovaRicettaNomeField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE && nuoveRicetteSuggestMenu.isShowing()) {
+                nuoveRicetteSuggestMenu.hide();
+            }
+        });
+    }
+
+    private void updateNuovaRicettaSuggestions(String text) {
+        if (nuovaRicettaNomeField == null) return;
+        String q = text != null ? text.trim() : "";
+        if (q.isEmpty()) {
+            nuoveRicetteSuggestMenu.hide();
+            return;
+        }
+
+        java.util.Set<Integer> alreadyInSession = new java.util.HashSet<>();
+        if (ricetteListView != null && ricetteListView.getItems() != null) {
+            for (Ricetta r : ricetteListView.getItems()) {
+                if (r != null && r.getIdRicetta() != null) {
+                    alreadyInSession.add(r.getIdRicetta());
+                }
+            }
+        }
+
+        String qLower = q.toLowerCase();
+        List<Ricetta> matches = ricetteDisponibiliMaster.stream()
+                .filter(r -> r != null && r.getNome() != null && r.getNome().toLowerCase().contains(qLower))
+                .filter(r -> r.getIdRicetta() == null || !alreadyInSession.contains(r.getIdRicetta()))
+                .limit(8)
+                .collect(Collectors.toList());
+
+        if (matches.isEmpty()) {
+            nuoveRicetteSuggestMenu.hide();
+            return;
+        }
+
+        List<MenuItem> items = new ArrayList<>();
+        for (Ricetta r : matches) {
+            MenuItem mi = new MenuItem(displayRicetta(r));
+            mi.setOnAction(ev -> {
+                ricettaSelezionataNuovaSuggest = r;
+                if (nuovaRicettaNomeField != null) {
+                    nuovaRicettaNomeField.setText(r.getNome() != null ? r.getNome() : "");
+                    nuovaRicettaNomeField.positionCaret(nuovaRicettaNomeField.getText().length());
+                }
+                if (nuovaRicettaDescrField != null) {
+                    nuovaRicettaDescrField.setText(r.getDescrizione() != null ? r.getDescrizione() : "");
+                    nuovaRicettaDescrField.setDisable(true);
+                }
+                if (nuovaRicettaTempoField != null) {
+                    nuovaRicettaTempoField.setText(r.getTempo() != null ? r.getTempo().toString() : "");
+                    nuovaRicettaTempoField.setDisable(true);
+                }
+
+                // Se scelgo una ricetta già esistente, non devo inserire ingredienti per crearla
+                ingredientiNuovaRicetta.clear();
+                if (ingredientiListView != null) {
+                    ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredientiNuovaRicetta));
+                    ingredientiListView.setVisible(false);
+                    ingredientiListView.setManaged(false);
+                }
+                if (nuovoIngredienteNomeField != null) nuovoIngredienteNomeField.clear();
+                if (nuovoIngredienteUnitaField != null) nuovoIngredienteUnitaField.clear();
+                if (ingredienteQuantitaField != null) ingredienteQuantitaField.clear();
+
+                applyRicettaMode(sessioneSelezionata != null && sessioneSelezionata.getIdSessione() != null);
+                nuoveRicetteSuggestMenu.hide();
+            });
+            items.add(mi);
+        }
+
+        nuoveRicetteSuggestMenu.getItems().setAll(items);
+        if (!nuoveRicetteSuggestMenu.isShowing() && nuovaRicettaNomeField.isFocused()) {
+            nuoveRicetteSuggestMenu.show(nuovaRicettaNomeField, Side.BOTTOM, 0, 0);
+        }
+    }
+
+    private void setupIngredienteSuggest() {
+        if (nuovoIngredienteNomeField == null) return;
+
+        nuovoIngredienteNomeField.textProperty().addListener((obs, oldVal, newVal) -> {
+            ingredienteSelezionatoSuggest = null;
+            if (nuovoIngredienteUnitaField != null) {
+                nuovoIngredienteUnitaField.setDisable(false);
+            }
+            updateIngredienteSuggestions(newVal);
+        });
+
+        nuovoIngredienteNomeField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && ingredientiSuggestMenu.isShowing()) {
+                ingredientiSuggestMenu.hide();
+            }
+        });
+
+        nuovoIngredienteNomeField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE && ingredientiSuggestMenu.isShowing()) {
+                ingredientiSuggestMenu.hide();
+            }
+        });
+    }
+
+    private void updateIngredienteSuggestions(String text) {
+        if (nuovoIngredienteNomeField == null) return;
+        String q = text != null ? text.trim() : "";
+        if (q.isEmpty()) {
+            ingredientiSuggestMenu.hide();
+            return;
+        }
+
+        java.util.Set<String> alreadyAdded = new java.util.HashSet<>();
+        for (IngredienteQuantita iq : ingredientiNuovaRicetta) {
+            if (iq != null && iq.getNome() != null) {
+                alreadyAdded.add(iq.getNome().trim().toLowerCase());
+            }
+        }
+
+        String qLower = q.toLowerCase();
+        List<Ingrediente> matches = ingredientiDisponibiliMaster.stream()
+                .filter(i -> i != null && i.getNome() != null && i.getNome().toLowerCase().contains(qLower))
+            .filter(i -> !alreadyAdded.contains(i.getNome().trim().toLowerCase()))
+                .limit(8)
+                .collect(Collectors.toList());
+
+        if (matches.isEmpty()) {
+            ingredientiSuggestMenu.hide();
+            return;
+        }
+
+        List<MenuItem> items = new ArrayList<>();
+        for (Ingrediente ing : matches) {
+            MenuItem mi = new MenuItem(displayIngrediente(ing));
+            mi.setOnAction(ev -> {
+                ingredienteSelezionatoSuggest = ing;
+                if (nuovoIngredienteNomeField != null) {
+                    nuovoIngredienteNomeField.setText(ing.getNome());
+                    nuovoIngredienteNomeField.positionCaret(nuovoIngredienteNomeField.getText().length());
+                }
+                if (nuovoIngredienteUnitaField != null) {
+                    nuovoIngredienteUnitaField.setText(ing.getUnitàDiMisura() != null ? ing.getUnitàDiMisura() : "");
+                    nuovoIngredienteUnitaField.setDisable(true);
+                }
+                ingredientiSuggestMenu.hide();
+            });
+            items.add(mi);
+        }
+        ingredientiSuggestMenu.getItems().setAll(items);
+        if (!ingredientiSuggestMenu.isShowing() && nuovoIngredienteNomeField.isFocused()) {
+            ingredientiSuggestMenu.show(nuovoIngredienteNomeField, Side.BOTTOM, 0, 0);
+        }
+    }
+
+    private String displayRicetta(Ricetta ricetta) {
+        if (ricetta == null) return "";
+        String nome = ricetta.getNome() != null ? ricetta.getNome() : "";
+        String tempo = ricetta.getTempo() != null ? ricetta.getTempo().toString() : "";
+        return nome + (tempo.isEmpty() ? "" : " (" + tempo + ")");
+    }
+
+    private String displayIngrediente(Ingrediente ingrediente) {
+        if (ingrediente == null) return "";
+        String nome = ingrediente.getNome() != null ? ingrediente.getNome() : "";
+        String unita = ingrediente.getUnitàDiMisura() != null ? ingrediente.getUnitàDiMisura() : "";
+        return nome + (unita.isEmpty() ? "" : " (" + unita + ")");
+    }
+
+    private void applyRicettaMode(boolean enabledForSession) {
+        if (!enabledForSession) return;
+
+        boolean existing = false;
+        if (ricettaSelezionataNuovaSuggest != null && ricettaSelezionataNuovaSuggest.getIdRicetta() != null) {
+            existing = true;
+        } else if (nuovaRicettaNomeField != null) {
+            String text = nuovaRicettaNomeField.getText();
+            if (text != null && !text.isBlank()) {
+                Ricetta r = resolveRicetta(text);
+                existing = (r != null && r.getIdRicetta() != null);
+            }
+        }
+
+        // Come per l'ingrediente: se esiste lo selezioni e i campi "di definizione" diventano non modificabili
+        if (nuovaRicettaDescrField != null) nuovaRicettaDescrField.setDisable(existing);
+        if (nuovaRicettaTempoField != null) nuovaRicettaTempoField.setDisable(existing);
+
+        // Se è ricetta esistente, disabilita l'inserimento ingredienti (servono solo per creare ricetta nuova)
+        if (nuovoIngredienteNomeField != null) nuovoIngredienteNomeField.setDisable(existing);
+        if (nuovoIngredienteUnitaField != null) nuovoIngredienteUnitaField.setDisable(existing);
+        if (ingredienteQuantitaField != null) ingredienteQuantitaField.setDisable(existing);
+        if (aggiungiIngredienteButton != null) aggiungiIngredienteButton.setDisable(existing);
+    }
+
+    private Ricetta resolveRicetta(String text) {
+        if (text == null) return null;
+        String s = text.trim();
+        if (s.isEmpty()) return null;
+
+        // match per nome (ignora eventuale "(tempo)")
+        int parenIdx = s.indexOf('(');
+        String name = parenIdx > 0 ? s.substring(0, parenIdx).trim() : s;
+        for (Ricetta r : ricetteDisponibiliMaster) {
+            if (r == null || r.getNome() == null) continue;
+            if (r.getNome().equalsIgnoreCase(name)) return r;
+        }
+        return null;
+    }
+
+    private Ingrediente resolveIngrediente(String text) {
+        if (text == null) return null;
+        String s = text.trim();
+        if (s.isEmpty()) return null;
+
+        // match per nome (ignora eventuale "(unità)")
+        int parenIdx = s.indexOf('(');
+        String name = parenIdx > 0 ? s.substring(0, parenIdx).trim() : s;
+        for (Ingrediente i : ingredientiDisponibiliMaster) {
+            if (i == null || i.getNome() == null) continue;
+            if (i.getNome().equalsIgnoreCase(name)) return i;
+        }
+        return null;
     }
 
     private void openListaSpesa(SessionePresenza sessione) {

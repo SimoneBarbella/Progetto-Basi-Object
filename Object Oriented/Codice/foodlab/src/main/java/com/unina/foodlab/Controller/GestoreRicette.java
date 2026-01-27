@@ -97,4 +97,12 @@ public class GestoreRicette {
         }
     }
 
+    public void disassociaRicettaSessione(int idSessione, int idRicetta) {
+        try {
+            ricettaDao.unlinkRicettaFromSessione(idSessione, idRicetta);
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore rimozione ricetta dalla sessione", e);
+        }
+    }
+
 }

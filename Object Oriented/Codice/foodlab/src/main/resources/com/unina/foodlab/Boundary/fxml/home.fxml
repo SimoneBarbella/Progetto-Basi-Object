@@ -58,7 +58,8 @@
         <FlowPane hgap="18" vgap="18" alignment="CENTER" styleClass="dashboard-buttons" prefWrapLength="720">
                 <Button text="Crea Nuovo Corso" onAction="#onCreaCorsoClick" styleClass="dashboard-button" />
                 <Button text="Studenti" styleClass="dashboard-button" />
-            <Button text="Report &amp; Statistiche" styleClass="dashboard-button" />
+            <Button text="Notifiche" onAction="#onNotificheClick" styleClass="dashboard-button" />
+            <Button text="Report" onAction="#onReportClick" styleClass="dashboard-button" />
         </FlowPane>
 
         <HBox alignment="CENTER_RIGHT" spacing="10" styleClass="dashboard-footer">
