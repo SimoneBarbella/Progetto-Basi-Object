@@ -2,26 +2,22 @@ package com.unina.foodlab.Boundary;
 
 import com.unina.foodlab.Controller.GestoreNotifiche;
 import com.unina.foodlab.Controller.GestoreCorsi;
+import com.unina.foodlab.Boundary.util.FormatiDataOra;
+import com.unina.foodlab.Boundary.util.InterfacciaFx;
+import com.unina.foodlab.Boundary.util.NavigatoreScene;
 import com.unina.foodlab.Entity.Chef;
 import com.unina.foodlab.Entity.Corso;
 import com.unina.foodlab.Entity.Notifica;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -48,17 +44,11 @@ public class NotificheBoundary {
     @FXML
     private Button dettagliButton;
 
-    @FXML
-    private ComboBox<CorsoChoice> corsoCombo;
-
-    @FXML
-    private TextArea messaggioArea;
-
     private Chef chef;
 
     private final Map<Integer, String> corsoNameById = new HashMap<>();
 
-    private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private final DateTimeFormatter dtf = FormatiDataOra.YYYY_MM_DD_HH_MM;
 
     @FXML
     private void initialize() {
@@ -73,14 +63,7 @@ public class NotificheBoundary {
         if (corsoCol != null) {
             corsoCol.setCellValueFactory(c -> {
                 Integer id = c.getValue() != null ? c.getValue().getIdCorso() : null;
-                String val;
-                if (id == null) {
-                    val = "Tutti";
-                } else {
-                    String nome = corsoNameById.get(id);
-                    val = (nome != null && !nome.isBlank()) ? (id + " - " + nome) : String.valueOf(id);
-                }
-                return new javafx.beans.property.SimpleStringProperty(val);
+                return new javafx.beans.property.SimpleStringProperty(formatCorsoLabel(id));
             });
         }
 
@@ -94,6 +77,7 @@ public class NotificheBoundary {
                 }
             });
         }
+
     }
 
     public void initData(Chef chef) {
@@ -105,6 +89,18 @@ public class NotificheBoundary {
 
         loadCorsiChoices();
         refreshNotifiche();
+    }
+
+    @FXML
+    private void onNuovaNotificaClick(ActionEvent event) {
+        NavigatoreScene.switchScene(
+            event,
+            "Notifiche",
+            "/com/unina/foodlab/Boundary/fxml/scriviNotifica.fxml",
+            "Risorsa scriviNotifica.fxml non trovata nel classpath.",
+            (ScriviNotificaBoundary controller) -> controller.initData(chef),
+            ScriviNotificaBoundary.class
+        );
     }
 
     @FXML
@@ -145,13 +141,7 @@ public class NotificheBoundary {
 
         String data = selected.getDataInvio() != null ? selected.getDataInvio().format(dtf) : "";
 
-        String corso;
-        if (selected.getIdCorso() == null) {
-            corso = "Tutti";
-        } else {
-            String nome = corsoNameById.get(selected.getIdCorso());
-            corso = (nome != null && !nome.isBlank()) ? (selected.getIdCorso() + " - " + nome) : String.valueOf(selected.getIdCorso());
-        }
+        String corso = formatCorsoLabel(selected.getIdCorso());
 
         String msg = selected.getMessaggio() != null ? selected.getMessaggio() : "";
 
@@ -170,78 +160,32 @@ public class NotificheBoundary {
         alert.showAndWait();
     }
 
-    @FXML
-    private void onInviaClick(ActionEvent event) {
-        if (chef == null) {
-            showWarning("Chef non valido.");
-            return;
+    private String formatCorsoLabel(Integer idCorso) {
+        if (idCorso == null) {
+            return "Tutti i corsi";
         }
-
-        String messaggio = messaggioArea != null ? messaggioArea.getText() : null;
-        if (messaggio == null || messaggio.isBlank()) {
-            showWarning("Inserisci un messaggio.");
-            return;
-        }
-
-        Integer idCorso = null;
-        if (corsoCombo != null) {
-            CorsoChoice selected = corsoCombo.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                idCorso = selected.idCorso;
-            }
-        }
-
-        try {
-            GestoreNotifiche.getInstance().inviaNotifica(chef, messaggio, idCorso);
-            if (messaggioArea != null) {
-                messaggioArea.clear();
-            }
-            refreshNotifiche();
-            showInfo("Notifica inviata.");
-        } catch (RuntimeException ex) {
-            showError(ex.getMessage());
-        }
+        String nome = corsoNameById.get(idCorso);
+        return (nome != null && !nome.isBlank()) ? (idCorso + " - " + nome) : String.valueOf(idCorso);
     }
 
     private void loadCorsiChoices() {
-        if (corsoCombo == null) {
-            return;
-        }
         corsoNameById.clear();
 
-        corsoCombo.getItems().clear();
-        corsoCombo.getItems().add(new CorsoChoice(null, "Tutti i corsi"));
-
         if (chef == null) {
-            corsoCombo.getSelectionModel().selectFirst();
             return;
         }
 
         try {
             List<Corso> corsi = GestoreCorsi.getInstance().getCorsiGestiti(chef);
             for (Corso c : corsi) {
-                Integer id = safeParseInt(c != null ? c.getIdCorso() : null);
+				Integer id = c != null ? c.getIdCorso() : null;
                 String nome = c != null ? c.getNome() : null;
                 if (id != null) {
                     corsoNameById.put(id, nome != null ? nome : "");
-                    corsoCombo.getItems().add(new CorsoChoice(id, id + " - " + (nome != null ? nome : "")));
                 }
             }
         } catch (Exception e) {
             System.err.println("[NotificheBoundary] Errore caricamento corsi: " + e.getMessage());
-        }
-
-        corsoCombo.getSelectionModel().selectFirst();
-    }
-
-    private Integer safeParseInt(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        if (t.isEmpty()) return null;
-        try {
-            return Integer.parseInt(t);
-        } catch (NumberFormatException ex) {
-            return null;
         }
     }
 
@@ -264,69 +208,22 @@ public class NotificheBoundary {
 
     @FXML
     private void onBackClick(ActionEvent event) {
-        try {
-            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/home.fxml");
-            if (location == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Notifiche");
-                alert.setHeaderText("Schermata non trovata");
-                alert.setContentText("Risorsa home.fxml non trovata nel classpath.");
-                alert.showAndWait();
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(location);
-            Parent root = loader.load();
-
-            HomeBoundary controller = loader.getController();
-            controller.initData(chef);
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.centerOnScreen();
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("[NotificheBoundary] Errore ritorno Home: " + e.getMessage());
-            e.printStackTrace();
-        }
+        NavigatoreScene.switchScene(
+            event,
+            "Notifiche",
+            "/com/unina/foodlab/Boundary/fxml/home.fxml",
+            "Risorsa home.fxml non trovata nel classpath.",
+            (HomeBoundary controller) -> controller.initData(chef),
+            HomeBoundary.class
+        );
     }
 
     private void showWarning(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Notifiche");
-        alert.setHeaderText("Attenzione");
-        alert.setContentText(message);
-        alert.showAndWait();
+        InterfacciaFx.showWarning("Notifiche", "Attenzione", message);
     }
 
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Notifiche");
-        alert.setHeaderText("Errore");
-        alert.setContentText(message);
-        alert.showAndWait();
+        InterfacciaFx.showError("Notifiche", "Errore", message);
     }
 
-    private void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Notifiche");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private static class CorsoChoice {
-        private final Integer idCorso;
-        private final String label;
-
-        private CorsoChoice(Integer idCorso, String label) {
-            this.idCorso = idCorso;
-            this.label = label;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-    }
 }

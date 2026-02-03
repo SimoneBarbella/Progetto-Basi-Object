@@ -1,5 +1,5 @@
 @ECHO OFF
-SETLOCAL
+SETLOCAL EnableDelayedExpansion
 
 SET MVNW_REPOURL=https://repo.maven.apache.org/maven2
 SET WRAPPER_JAR=.mvn\wrapper\maven-wrapper.jar
@@ -23,5 +23,19 @@ IF NOT EXIST "%WRAPPER_JAR%" (
 SET JAVA_EXE=java
 IF NOT "%JAVA_HOME%"=="" SET JAVA_EXE=%JAVA_HOME%\bin\java.exe
 
-"%JAVA_EXE%" "-Dmaven.multiModuleProjectDirectory=%CD%" -classpath "%WRAPPER_JAR%" org.apache.maven.wrapper.MavenWrapperMain %*
+REM Read extra JVM arguments from .mvn/jvm.config (one arg per line)
+SET JVM_CONFIG_FILE=.mvn\jvm.config
+SET JVM_CONFIG_MAVEN_OPTS=
+IF EXIST "%JVM_CONFIG_FILE%" (
+  FOR /F "usebackq delims=" %%A IN ("%JVM_CONFIG_FILE%") DO (
+    SET "LINE=%%A"
+    IF NOT "!LINE!"=="" (
+      IF NOT "!LINE:~0,1!"=="#" (
+        SET "JVM_CONFIG_MAVEN_OPTS=!JVM_CONFIG_MAVEN_OPTS! !LINE!"
+      )
+    )
+  )
+)
+
+"%JAVA_EXE%" %JVM_CONFIG_MAVEN_OPTS% "-Dmaven.multiModuleProjectDirectory=%CD%" -classpath "%WRAPPER_JAR%" org.apache.maven.wrapper.MavenWrapperMain %*
 ENDLOCAL

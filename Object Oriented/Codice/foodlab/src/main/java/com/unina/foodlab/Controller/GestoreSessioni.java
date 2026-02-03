@@ -6,6 +6,7 @@ import com.unina.foodlab.Entity.IngredienteQuantita;
 import com.unina.foodlab.Entity.Sessione;
 import com.unina.foodlab.Enum.TipoSessione;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,7 +55,7 @@ public class GestoreSessioni {
         }
     }
 
-    public double getQuantitaTotaleBySessioneId(int idSessione) {
+    public BigDecimal getQuantitaTotaleBySessioneId(int idSessione) {
         try {
             return sessioneDao.getQuantitaTotaleBySessioneId(idSessione);
         } catch (SQLException e) {

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.8" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.unina.foodlab.Boundary.ScriviNotificaBoundary"
+           prefWidth="1200" prefHeight="760">
+
+    <stylesheets>
+        <URL value="@../css/home.css" />
+    </stylesheets>
+
+    <Pane styleClass="dashboard-background" />
+
+    <VBox spacing="16" alignment="TOP_CENTER" maxWidth="920" styleClass="dashboard-card">
+        <padding>
+            <Insets top="24" right="24" bottom="24" left="24" />
+        </padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="dashboard-header">
+            <Label text="Scrivi notifica" styleClass="dashboard-title" />
+            <Label fx:id="chefLabel" text="Chef" styleClass="dashboard-subtitle" />
+        </HBox>
+
+        <VBox spacing="10">
+            <Label text="Destinazione" styleClass="section-title" />
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <VBox spacing="6">
+                    <Label text="Corso" />
+                    <ComboBox fx:id="corsoCombo" prefWidth="360" promptText="Tutti i corsi" />
+                </VBox>
+            </HBox>
+
+            <VBox spacing="6">
+                <Label text="Messaggio" />
+                <TextArea fx:id="messaggioArea" promptText="Scrivi qui la notifica..." prefRowCount="10" wrapText="true" />
+            </VBox>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button text="Annulla" onAction="#onBackClick" styleClass="cancel-button" />
+                <Button text="Invia" onAction="#onInviaClick" styleClass="dashboard-button" />
+            </HBox>
+        </VBox>
+
+    </VBox>
+
+</StackPane>

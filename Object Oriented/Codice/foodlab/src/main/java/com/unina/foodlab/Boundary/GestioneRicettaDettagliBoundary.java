@@ -1,6 +1,7 @@
 package com.unina.foodlab.Boundary;
 
 import com.unina.foodlab.Controller.GestoreRicette;
+import com.unina.foodlab.Boundary.util.NavigatoreScene;
 import com.unina.foodlab.Entity.Chef;
 import com.unina.foodlab.Entity.Corso;
 import com.unina.foodlab.Entity.IngredienteQuantita;
@@ -9,17 +10,9 @@ import com.unina.foodlab.Entity.SessionePresenza;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
-import javafx.stage.Stage;
-
-import java.io.IOException;
 import java.util.List;
 
 public class GestioneRicettaDettagliBoundary {
@@ -37,6 +30,9 @@ public class GestioneRicettaDettagliBoundary {
     private TextArea ricettaDescrArea;
 
     @FXML
+    private Label ricetteTitoloLabel;
+
+    @FXML
     private ListView<Ricetta> ricetteListView;
 
     @FXML
@@ -44,7 +40,6 @@ public class GestioneRicettaDettagliBoundary {
 
     private Corso corso;
     private Chef chef;
-    private SessionePresenza sessione;
 
     @FXML
     private void initialize() {
@@ -85,15 +80,11 @@ public class GestioneRicettaDettagliBoundary {
     }
 
     public void initDataSessione(SessionePresenza sessione, Ricetta preselect, Corso corso, Chef chef) {
-        this.sessione = sessione;
         this.corso = corso;
         this.chef = chef;
 
-        if (corsoLabel != null && corso != null) {
-            String nome = corso.getNome();
-            String id = corso.getIdCorso();
-            corsoLabel.setText(nome + (id != null ? " (ID " + id + ")" : ""));
-        }
+        setRicetteTitoloLabel(sessione, preselect);
+        setCorsoLabel(corso);
 
         List<Ricetta> ricette;
         if (sessione != null && sessione.getIdSessione() != null) {
@@ -104,23 +95,17 @@ public class GestioneRicettaDettagliBoundary {
             ricette = java.util.List.of();
         }
 
-        if (ricetteListView != null) {
-            ricetteListView.setItems(javafx.collections.FXCollections.observableArrayList(ricette));
-
-            if (preselect != null) {
-                for (Ricetta r : ricette) {
-                    if (r != null && r.getIdRicetta() != null && r.getIdRicetta().equals(preselect.getIdRicetta())) {
-                        ricetteListView.getSelectionModel().select(r);
-                        break;
-                    }
-                }
-            }
-            if (!ricetteListView.getItems().isEmpty() && ricetteListView.getSelectionModel().getSelectedItem() == null) {
-                ricetteListView.getSelectionModel().selectFirst();
-            }
-        } else {
+        if (ricetteListView == null) {
             // se manca la lista, mostra comunque la ricetta preselezionata
             showRicetta(preselect);
+            return;
+        }
+
+        ricetteListView.setItems(javafx.collections.FXCollections.observableArrayList(ricette));
+        selectRicettaIfPresent(ricette, preselect);
+
+        if (!ricetteListView.getItems().isEmpty() && ricetteListView.getSelectionModel().getSelectedItem() == null) {
+            ricetteListView.getSelectionModel().selectFirst();
         }
     }
 
@@ -137,41 +122,69 @@ public class GestioneRicettaDettagliBoundary {
         }
 
         if (ingredientiListView != null) {
-            if (ricetta != null && ricetta.getIdRicetta() != null) {
-                List<IngredienteQuantita> ingredienti = GestoreRicette.getInstance().getIngredientiPerRicetta(ricetta.getIdRicetta());
-                ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredienti));
-            } else {
-                ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList());
+            loadIngredienti(ricetta);
+        }
+    }
+
+    private void setRicetteTitoloLabel(SessionePresenza sessione, Ricetta preselect) {
+        if (ricetteTitoloLabel == null) {
+            return;
+        }
+        if (sessione != null && sessione.getIdSessione() != null) {
+            ricetteTitoloLabel.setText("Ricette della sessione");
+            return;
+        }
+        if (preselect != null) {
+            ricetteTitoloLabel.setText("Ricetta");
+            return;
+        }
+        ricetteTitoloLabel.setText("Ricette");
+    }
+
+    private void setCorsoLabel(Corso corso) {
+        if (corsoLabel == null || corso == null) {
+            return;
+        }
+        String nome = corso.getNome();
+		Integer id = corso.getIdCorso();
+        corsoLabel.setText(nome + (id != null ? " (ID " + id + ")" : ""));
+    }
+
+    private void selectRicettaIfPresent(List<Ricetta> ricette, Ricetta preselect) {
+        if (preselect == null || ricetteListView == null) {
+            return;
+        }
+        for (Ricetta r : ricette) {
+            if (r != null && r.getIdRicetta() != null && r.getIdRicetta().equals(preselect.getIdRicetta())) {
+                ricetteListView.getSelectionModel().select(r);
+                break;
             }
         }
     }
 
+    private void loadIngredienti(Ricetta ricetta) {
+        if (ingredientiListView == null) {
+            return;
+        }
+        if (ricetta == null || ricetta.getIdRicetta() == null) {
+            ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList());
+            return;
+        }
+        List<IngredienteQuantita> ingredienti = GestoreRicette.getInstance().getIngredientiPerRicetta(ricetta.getIdRicetta());
+        ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredienti));
+    }
+
     @FXML
     private void onBackClick(ActionEvent event) {
-        try {
-            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/gestioneSessioniPratiche.fxml");
-            if (location == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Ricetta");
-                alert.setHeaderText("Schermata non trovata");
-                alert.setContentText("Risorsa gestioneSessioniPratiche.fxml non trovata nel classpath.");
-                alert.showAndWait();
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(location);
-            Parent root = loader.load();
-
-            GestioneSessioniPraticheBoundary controller = loader.getController();
-            controller.initData(corso, chef);
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.centerOnScreen();
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("[GestioneRicettaDettagliBoundary] Errore ritorno: " + e.getMessage());
-            e.printStackTrace();
-        }
+        final Corso selectedCorso = corso;
+        final Chef loggedChef = chef;
+        NavigatoreScene.switchScene(
+            event,
+            "Ricetta",
+            "/com/unina/foodlab/Boundary/fxml/gestioneSessioniPratiche.fxml",
+            "Risorsa gestioneSessioniPratiche.fxml non trovata nel classpath.",
+            (GestioneSessioniPraticheBoundary controller) -> controller.initData(selectedCorso, loggedChef),
+            GestioneSessioniPraticheBoundary.class
+        );
     }
 }

@@ -1,6 +1,9 @@
 package com.unina.foodlab.Boundary;
 
 import com.unina.foodlab.Controller.GestoreSessioni;
+import com.unina.foodlab.Boundary.util.InterfacciaFx;
+import com.unina.foodlab.Boundary.util.FormatiDataOra;
+import com.unina.foodlab.Boundary.util.NavigatoreScene;
 import com.unina.foodlab.Entity.Chef;
 import com.unina.foodlab.Entity.Corso;
 import com.unina.foodlab.Entity.Sessione;
@@ -10,11 +13,6 @@ import com.unina.foodlab.Enum.TipoSessione;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
@@ -22,14 +20,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import javafx.scene.text.Text;
-
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class GestioneSessioniBoundary {
@@ -87,7 +81,7 @@ public class GestioneSessioniBoundary {
         if (dataCol != null) {
             dataCol.setCellValueFactory(c -> {
                 LocalDateTime d = c.getValue().getOraInizio();
-                String val = d != null ? d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "";
+                String val = d != null ? d.format(FormatiDataOra.YYYY_MM_DD_HH_MM) : "";
                 return new javafx.beans.property.SimpleStringProperty(val);
             });
         }
@@ -150,7 +144,7 @@ public class GestioneSessioniBoundary {
         this.chef = chef;
         if (corsoLabel != null && corso != null) {
             String nome = corso.getNome();
-            String id = corso.getIdCorso();
+			Integer id = corso.getIdCorso();
             if (nome != null && !nome.isBlank()) {
                 corsoLabel.setText(nome + (id != null ? " (ID " + id + ")" : ""));
             } else if (id != null) {
@@ -179,22 +173,14 @@ public class GestioneSessioniBoundary {
         } catch (Exception e) {
             System.err.println("[GestioneSessioniBoundary] Errore caricamento sessioni: " + e.getMessage());
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Errore caricamento sessioni");
-            alert.setContentText("Impossibile caricare le sessioni del corso.");
-            alert.showAndWait();
+            InterfacciaFx.showError("Sessioni", "Errore caricamento sessioni", "Impossibile caricare le sessioni del corso.");
         }
     }
 
     @FXML
     private void onAddSessioneClick(ActionEvent event) {
         if (corso == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Corso non selezionato");
-            alert.setContentText("Impossibile creare una sessione senza un corso.");
-            alert.showAndWait();
+            InterfacciaFx.showWarning("Sessioni", "Corso non selezionato", "Impossibile creare una sessione senza un corso.");
             return;
         }
 
@@ -203,49 +189,8 @@ public class GestioneSessioniBoundary {
         TipoSessione tipo = tipoSessioneCombo != null ? tipoSessioneCombo.getValue() : null;
         String teoria = teoriaField != null ? teoriaField.getText() : null;
 
-        if (data == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Data mancante");
-            alert.setContentText("Seleziona la data della sessione.");
-            alert.showAndWait();
-            return;
-        }
-        if (tipo == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Tipo mancante");
-            alert.setContentText("Seleziona il tipo di sessione.");
-            alert.showAndWait();
-            return;
-        }
-        if (oraText == null || oraText.isBlank()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Orario mancante");
-            alert.setContentText("Inserisci l'orario in formato HH:mm.");
-            alert.showAndWait();
-            return;
-        }
-
-        LocalTime ora;
-        try {
-            ora = LocalTime.parse(oraText.trim(), DateTimeFormatter.ofPattern("HH:mm"));
-        } catch (DateTimeParseException ex) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Formato orario non valido");
-            alert.setContentText("Usa il formato HH:mm (es. 18:30).");
-            alert.showAndWait();
-            return;
-        }
-
-        if (tipo == TipoSessione.online && (teoria == null || teoria.isBlank())) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Teoria mancante");
-            alert.setContentText("Inserisci la teoria per le sessioni online.");
-            alert.showAndWait();
+        LocalTime ora = validateAndParseOraSessione(data, tipo, oraText, teoria);
+        if (ora == null) {
             return;
         }
 
@@ -259,69 +204,64 @@ public class GestioneSessioniBoundary {
         } catch (RuntimeException ex) {
             System.err.println("[GestioneSessioniBoundary] Errore creazione sessione: " + ex.getMessage());
             ex.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Sessioni");
-            alert.setHeaderText("Errore creazione sessione");
-            alert.setContentText(ex.getMessage());
-            alert.showAndWait();
+            InterfacciaFx.showError("Sessioni", "Errore creazione sessione", ex.getMessage());
         }
+    }
+
+    private static LocalTime validateAndParseOraSessione(LocalDate data, TipoSessione tipo, String oraText, String teoria) {
+        if (data == null) {
+            InterfacciaFx.showWarning("Sessioni", "Data mancante", "Seleziona la data della sessione.");
+            return null;
+        }
+        if (tipo == null) {
+            InterfacciaFx.showWarning("Sessioni", "Tipo mancante", "Seleziona il tipo di sessione.");
+            return null;
+        }
+        if (oraText == null || oraText.isBlank()) {
+            InterfacciaFx.showWarning("Sessioni", "Orario mancante", "Inserisci l'orario in formato HH:mm.");
+            return null;
+        }
+
+        final LocalTime ora;
+        try {
+            ora = LocalTime.parse(oraText.trim(), FormatiDataOra.HH_MM);
+        } catch (DateTimeParseException ex) {
+            InterfacciaFx.showWarning("Sessioni", "Formato orario non valido", "Usa il formato HH:mm (es. 18:30).");
+            return null;
+        }
+
+        if (tipo == TipoSessione.online && (teoria == null || teoria.isBlank())) {
+            InterfacciaFx.showWarning("Sessioni", "Teoria mancante", "Inserisci la teoria per le sessioni online.");
+            return null;
+        }
+
+        return ora;
     }
 
     @FXML
     private void onBackClick(ActionEvent event) {
-        try {
-            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/home.fxml");
-            if (location == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Home");
-                alert.setHeaderText("Schermata non trovata");
-                alert.setContentText("Risorsa home.fxml non trovata nel classpath.");
-                alert.showAndWait();
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(location);
-            Parent root = loader.load();
-
-            HomeBoundary controller = loader.getController();
-            controller.initData(chef);
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.centerOnScreen();
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("[GestioneSessioniBoundary] Errore ritorno home: " + e.getMessage());
-            e.printStackTrace();
-        }
+        final Chef loggedChef = chef;
+        NavigatoreScene.switchScene(
+            event,
+            "Home",
+            "/com/unina/foodlab/Boundary/fxml/home.fxml",
+            "Risorsa home.fxml non trovata nel classpath.",
+            (HomeBoundary controller) -> controller.initData(loggedChef),
+            HomeBoundary.class
+        );
     }
 
     @FXML
     private void onOpenPraticheClick(ActionEvent event) {
-        try {
-            java.net.URL location = getClass().getResource("/com/unina/foodlab/Boundary/fxml/gestioneSessioniPratiche.fxml");
-            if (location == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Sessioni pratiche");
-                alert.setHeaderText("Schermata non trovata");
-                alert.setContentText("Risorsa gestioneSessioniPratiche.fxml non trovata nel classpath.");
-                alert.showAndWait();
-                return;
-            }
-
-            FXMLLoader loader = new FXMLLoader(location);
-            Parent root = loader.load();
-
-            GestioneSessioniPraticheBoundary controller = loader.getController();
-            controller.initData(corso, chef);
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.centerOnScreen();
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("[GestioneSessioniBoundary] Errore apertura gestioneSessioniPratiche.fxml: " + e.getMessage());
-            e.printStackTrace();
-        }
+        final Corso selectedCorso = corso;
+        final Chef loggedChef = chef;
+        NavigatoreScene.switchScene(
+            event,
+            "Sessioni pratiche",
+            "/com/unina/foodlab/Boundary/fxml/gestioneSessioniPratiche.fxml",
+            "Risorsa gestioneSessioniPratiche.fxml non trovata nel classpath.",
+            (GestioneSessioniPraticheBoundary controller) -> controller.initData(selectedCorso, loggedChef),
+            GestioneSessioniPraticheBoundary.class
+        );
     }
 }

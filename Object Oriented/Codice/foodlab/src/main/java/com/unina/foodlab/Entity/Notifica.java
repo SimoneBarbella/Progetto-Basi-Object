@@ -9,7 +9,6 @@ public class Notifica {
     private LocalDateTime dataInvio;
     private String emailChef;
     private Integer idCorso;
-
     public Notifica() {
     }
 

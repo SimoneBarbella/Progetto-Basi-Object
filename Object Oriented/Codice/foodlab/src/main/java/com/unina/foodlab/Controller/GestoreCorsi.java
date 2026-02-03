@@ -34,14 +34,13 @@ public class GestoreCorsi {
         return instance;
     }
 
-    public Corso creaCorso(String idCorso, LocalDate dataInizio, String nome, String frequenza,
+    public Corso creaCorso(LocalDate dataInizio, String nome, String frequenza,
                            int numPartecipanti, int numSessioni, List<String> categorie, Chef chef) {
         if (chef == null) {
             throw new IllegalArgumentException("Chef non può essere null");
         }
 
         Corso corso = new Corso();
-        corso.setIdCorso(idCorso);
         corso.setDataInizio(dataInizio);
         corso.setNome(nome);
         corso.setFrequenza(frequenza);
@@ -65,5 +64,4 @@ public class GestoreCorsi {
             throw new RuntimeException("Errore caricamento categorie esistenti", e);
         }
     }
-
 }

@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,10 +83,13 @@ public class SessioneDao {
     }
 
     public List<Sessione> findByCorso(Corso corso) throws SQLException {
-        if (corso == null || corso.getIdCorso() == null || corso.getIdCorso().isBlank()) {
+        if (corso == null || corso.getIdCorso() == null) {
             throw new IllegalArgumentException("Corso o idCorso non valido");
         }
-        int idCorso = Integer.parseInt(corso.getIdCorso());
+        int idCorso = corso.getIdCorso();
+        if (idCorso <= 0) {
+            throw new IllegalArgumentException("Corso o idCorso non valido");
+        }
         String sql = "SELECT id_sessione, ora_inizio, num_aderenti, teoria, tipo_sessione, id_corso "
                 + "FROM Sessione WHERE id_corso = ? ORDER BY ora_inizio";
 
@@ -102,9 +106,13 @@ public class SessioneDao {
     }
 
     public void insertSessione(Corso corso, LocalDateTime oraInizio, TipoSessione tipo, String teoria) throws SQLException {
-        if (corso == null || corso.getIdCorso() == null || corso.getIdCorso().isBlank()) {
+		if (corso == null || corso.getIdCorso() == null) {
             throw new IllegalArgumentException("Corso o idCorso non valido");
         }
+		int idCorso = corso.getIdCorso();
+		if (idCorso <= 0) {
+			throw new IllegalArgumentException("Corso o idCorso non valido");
+		}
         if (oraInizio == null) {
             throw new IllegalArgumentException("Data sessione non valida");
         }
@@ -114,7 +122,7 @@ public class SessioneDao {
 
         String checkSql = "SELECT 1 FROM Sessione WHERE id_corso = ? AND ora_inizio = ? LIMIT 1";
         try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
-            psCheck.setInt(1, Integer.parseInt(corso.getIdCorso()));
+			psCheck.setInt(1, idCorso);
             psCheck.setTimestamp(2, Timestamp.valueOf(oraInizio));
             try (ResultSet rs = psCheck.executeQuery()) {
                 if (rs.next()) {
@@ -132,22 +140,23 @@ public class SessioneDao {
             } else {
                 ps.setNull(3, java.sql.Types.VARCHAR);
             }
-            ps.setInt(4, Integer.parseInt(corso.getIdCorso()));
+			ps.setInt(4, idCorso);
             ps.executeUpdate();
         }
     }
 
-    public double getQuantitaTotaleBySessioneId(int idSessione) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(quantita_totale), 0) AS tot FROM Vista_Fabbisogni_Sessione WHERE id_sessione = ?";
+    public BigDecimal getQuantitaTotaleBySessioneId(int idSessione) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(quantita_totale), 0::numeric) AS tot FROM Vista_Fabbisogni_Sessione WHERE id_sessione = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idSessione);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getDouble("tot");
+                    BigDecimal tot = rs.getBigDecimal("tot");
+                    return tot != null ? tot : BigDecimal.ZERO;
                 }
             }
         }
-        return 0.0;
+        return BigDecimal.ZERO;
     }
 
     public List<IngredienteQuantita> getListaSpesaBySessioneId(int idSessione) throws SQLException {

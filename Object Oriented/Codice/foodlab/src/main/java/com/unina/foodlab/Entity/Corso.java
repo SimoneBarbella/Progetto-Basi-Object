@@ -6,8 +6,7 @@ import java.util.List;
 
 public class Corso {
 
-	
-	private String idCorso;
+	private Integer idCorso;
 	private LocalDate dataInizio;
 	private String nome;
 	private String frequenza; 
@@ -25,7 +24,7 @@ public class Corso {
 		this.categorie = new ArrayList<>();
 	}
 	
-	public Corso(String idCorso, String nome, String frequenza, int numPartecipanti, int numSessioni) {
+	public Corso(Integer idCorso, String nome, String frequenza, int numPartecipanti, int numSessioni) {
 		this.idCorso = idCorso;
 		this.nome = nome;
 		this.frequenza = frequenza;
@@ -36,7 +35,7 @@ public class Corso {
 		this.sessioni=new ArrayList<>();
 	}
 
-	public Corso(String idCorso, LocalDate dataInizio, String nome, String frequenza, int numPartecipanti, int numSessioni) {
+	public Corso(Integer idCorso, LocalDate dataInizio, String nome, String frequenza, int numPartecipanti, int numSessioni) {
 		this.idCorso = idCorso;
 		this.dataInizio = dataInizio;
 		this.nome = nome;
@@ -50,12 +49,12 @@ public class Corso {
 	}
 
 
-	public String getIdCorso() {
+	public Integer getIdCorso() {
 		return idCorso;
 	}
 
 
-	public void setIdCorso(String idCorso) {
+	public void setIdCorso(Integer idCorso) {
 		this.idCorso = idCorso;
 	}
 

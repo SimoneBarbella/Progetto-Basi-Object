@@ -7,21 +7,27 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.unina.foodlab.Controller.GestoreCorsi;
+import com.unina.foodlab.Boundary.util.InterfacciaFx;
+import com.unina.foodlab.Boundary.util.UtilEccezioni;
 import com.unina.foodlab.Entity.Chef;
 import com.unina.foodlab.Entity.Corso;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 public class CreazioneCorsoBoundary {
+
+    private static final String TITLE = "Creazione corso";
+    private static final String NAME_PATTERN = "^[A-Za-zÀ-ÿ '’-]+$";
+    private static final int MAX_CATEGORIA_LENGTH = 50;
+
+    private record ValidationError(String header, String content) {}
 
     @FXML
     private DatePicker dataInizioPicker;
@@ -163,60 +169,25 @@ public class CreazioneCorsoBoundary {
     @FXML
     private void onSalvaClick(ActionEvent event) {
         LocalDate dataInizio = dataInizioPicker != null ? dataInizioPicker.getValue() : null;
-        String nome = nomeField != null ? nomeField.getText() : null;
-        String frequenza = frequenzaField != null ? frequenzaField.getText() : null;
+        String nome = readText(nomeField);
+        String frequenza = readText(frequenzaField);
         String categorieRaw = categorieField != null ? categorieField.getText() : null;
         Integer numPartecipanti = numPartecipantiSpinner != null ? numPartecipantiSpinner.getValue() : 0;
         Integer numSessioni = numSessioniSpinner != null ? numSessioniSpinner.getValue() : null;
 
-        if (chef == null) {
-            showError("Chef non impostato", "Impossibile creare il corso senza uno chef loggato.");
-            return;
-        }
-        if (dataInizio == null || nome == null || nome.isBlank() || frequenza == null || frequenza.isBlank()
-            || numSessioni == null) {
-            showError("Dati mancanti", "Compila tutti i campi richiesti.");
-            return;
-        }
-
         List<String> categorie = parseCategorie(categorieRaw);
-        if (categorie.isEmpty()) {
-            showError("Categorie mancanti", "Inserisci almeno una categoria.");
+        ValidationError validationError = validateInput(chef, dataInizio, nome, frequenza, numSessioni, categorie);
+        if (validationError != null) {
+            showError(validationError.header(), validationError.content());
             return;
-        }
-
-        if (dataInizio.isBefore(LocalDate.now())) {
-            showError("Data non valida", "La data di inizio non può essere nel passato.");
-            return;
-        }
-
-        if (!nome.matches("^[A-Za-zÀ-ÿ '’-]+$")) {
-            showError("Nome non valido", "Il nome del corso deve contenere solo lettere, spazi, apostrofi o trattini.");
-            return;
-        }
-
-        for (String categoria : categorie) {
-            if (categoria.length() > 50) {
-                showError("Categoria non valida", "Ogni categoria deve essere lunga massimo 50 caratteri.");
-                return;
-            }
-            if (!categoria.matches("^[A-Za-zÀ-ÿ '’-]+$")) {
-                showError("Categoria non valida", "Le categorie devono contenere solo lettere, spazi, apostrofi o trattini.");
-                return;
-            }
         }
 
         Corso corso;
         try {
-                corso = GestoreCorsi.getInstance().creaCorso(null, dataInizio, nome, frequenza,
-                    numPartecipanti, numSessioni, categorie, chef);
+			corso = GestoreCorsi.getInstance().creaCorso(dataInizio, nome, frequenza,
+                numPartecipanti, numSessioni, categorie, chef);
         } catch (RuntimeException ex) {
-            Throwable cause = ex;
-            while (cause.getCause() != null && cause.getCause() != cause) {
-                cause = cause.getCause();
-            }
-            String msg = cause.getMessage() != null ? cause.getMessage() : "Errore sconosciuto";
-            showError("Errore salvataggio", msg);
+            showError("Errore salvataggio", UtilEccezioni.messageOrFallback(ex, "Errore sconosciuto"));
             return;
         }
 
@@ -225,13 +196,50 @@ public class CreazioneCorsoBoundary {
             return;
         }
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Creazione corso");
-        alert.setHeaderText("Corso creato");
-        alert.setContentText("Corso creato con ID: " + corso.getIdCorso());
-        alert.showAndWait();
+        InterfacciaFx.showInfo(TITLE, "Corso creato", "Corso creato con ID: " + corso.getIdCorso());
+        InterfacciaFx.closeWindowFromEvent(event);
+    }
 
-        closeCurrentWindow();
+    private ValidationError validateInput(
+        Chef chef,
+        LocalDate dataInizio,
+        String nome,
+        String frequenza,
+        Integer numSessioni,
+        List<String> categorie
+    ) {
+        if (chef == null) {
+            return new ValidationError("Chef non impostato", "Impossibile creare il corso senza uno chef loggato.");
+        }
+        if (dataInizio == null || isBlank(nome) || isBlank(frequenza) || numSessioni == null) {
+            return new ValidationError("Dati mancanti", "Compila tutti i campi richiesti.");
+        }
+        if (categorie == null || categorie.isEmpty()) {
+            return new ValidationError("Categorie mancanti", "Inserisci almeno una categoria.");
+        }
+        if (dataInizio.isBefore(LocalDate.now())) {
+            return new ValidationError("Data non valida", "La data di inizio non può essere nel passato.");
+        }
+        if (!nome.matches(NAME_PATTERN)) {
+            return new ValidationError(
+                "Nome non valido",
+                "Il nome del corso deve contenere solo lettere, spazi, apostrofi o trattini."
+            );
+        }
+
+        for (String categoria : categorie) {
+            if (categoria.length() > MAX_CATEGORIA_LENGTH) {
+                return new ValidationError("Categoria non valida", "Ogni categoria deve essere lunga massimo 50 caratteri.");
+            }
+            if (!categoria.matches(NAME_PATTERN)) {
+                return new ValidationError(
+                    "Categoria non valida",
+                    "Le categorie devono contenere solo lettere, spazi, apostrofi o trattini."
+                );
+            }
+        }
+
+        return null;
     }
 
     @FXML
@@ -246,24 +254,21 @@ public class CreazioneCorsoBoundary {
         if (numSessioniSpinner != null && numSessioniSpinner.getValueFactory() != null) {
             numSessioniSpinner.getValueFactory().setValue(1);
         }
-        closeCurrentWindow();
+        InterfacciaFx.closeWindowFromEvent(event);
     }
 
     private void showError(String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Creazione corso");
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
+        InterfacciaFx.showError(TITLE, header, content);
     }
 
-    private void closeCurrentWindow() {
-        if (nomeField != null && nomeField.getScene() != null) {
-            Stage stage = (Stage) nomeField.getScene().getWindow();
-            if (stage != null) {
-                stage.close();
-            }
-        }
+    private static String readText(TextField field) {
+        if (field == null) return null;
+        String value = field.getText();
+        return value != null ? value.trim() : null;
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private List<String> parseCategorie(String raw) {

@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "test",
+			"type": "shell",
+			"command": "${workspaceFolder}\\Object Oriented\\Codice\\foodlab\\mvnw.cmd",
+			"args": [
+				"-B",
+				"test"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\Object Oriented\\Codice\\foodlab"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

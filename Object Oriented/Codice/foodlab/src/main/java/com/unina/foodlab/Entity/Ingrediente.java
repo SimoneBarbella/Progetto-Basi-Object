@@ -25,6 +25,4 @@ public class Ingrediente {
 	public void setUnitàDiMisura(String unitàDiMisura) {
 		this.unitàDiMisura = unitàDiMisura;
 	}
-	
-	
 }

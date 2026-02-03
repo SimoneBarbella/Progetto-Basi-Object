@@ -74,7 +74,7 @@ public class CorsoDao {
                 }
             }
 
-            corso.setIdCorso(String.valueOf(idCorso));
+            corso.setIdCorso(idCorso);
             conn.commit();
             return true;
         } catch (SQLException ex) {
@@ -101,7 +101,7 @@ public class CorsoDao {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Corso c = new Corso();
-                    c.setIdCorso(String.valueOf(rs.getInt("id_corso")));
+                    c.setIdCorso(rs.getInt("id_corso"));
                     Date d = rs.getDate("data_inizio");
                     if (d != null) c.setDataInizio(d.toLocalDate());
                     c.setNome(rs.getString("nome"));
