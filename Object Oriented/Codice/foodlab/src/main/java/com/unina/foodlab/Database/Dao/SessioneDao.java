@@ -23,7 +23,7 @@ public class SessioneDao {
     private final Connection conn;
 
     public SessioneDao() {
-        this.conn = DatabaseConnection.getInstance().getConnection();
+        this.conn = DatabaseConnection.getInstanza().getConnection();
     }
 
     private TipoSessione mapTipoSessione(String dbVal) {
@@ -66,30 +66,7 @@ public class SessioneDao {
         return sessione;
     }
 
-    public List<Sessione> findByCorsoId(int idCorso) throws SQLException {
-        String sql = "SELECT id_sessione, ora_inizio, num_aderenti, teoria, tipo_sessione, id_corso "
-                + "FROM Sessione WHERE id_corso = ? ORDER BY ora_inizio";
-
-        List<Sessione> result = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idCorso);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    result.add(mapRow(rs, null));
-                }
-            }
-        }
-        return result;
-    }
-
-    public List<Sessione> findByCorso(Corso corso) throws SQLException {
-        if (corso == null || corso.getIdCorso() == null) {
-            throw new IllegalArgumentException("Corso o idCorso non valido");
-        }
-        int idCorso = corso.getIdCorso();
-        if (idCorso <= 0) {
-            throw new IllegalArgumentException("Corso o idCorso non valido");
-        }
+    private List<Sessione> cercaPerCorsoInterno(int idCorso, Corso corso) throws SQLException {
         String sql = "SELECT id_sessione, ora_inizio, num_aderenti, teoria, tipo_sessione, id_corso "
                 + "FROM Sessione WHERE id_corso = ? ORDER BY ora_inizio";
 
@@ -105,7 +82,22 @@ public class SessioneDao {
         return result;
     }
 
-    public void insertSessione(Corso corso, LocalDateTime oraInizio, TipoSessione tipo, String teoria) throws SQLException {
+    public List<Sessione> cercaPerCorsoId(int idCorso) throws SQLException {
+        return cercaPerCorsoInterno(idCorso, null);
+    }
+
+    public List<Sessione> cercaPerCorso(Corso corso) throws SQLException {
+        if (corso == null || corso.getIdCorso() == null) {
+            throw new IllegalArgumentException("Corso o idCorso non valido");
+        }
+        int idCorso = corso.getIdCorso();
+        if (idCorso <= 0) {
+            throw new IllegalArgumentException("Corso o idCorso non valido");
+        }
+        return cercaPerCorsoInterno(idCorso, corso);
+    }
+
+    public void inserisciSessione(Corso corso, LocalDateTime oraInizio, TipoSessione tipo, String teoria) throws SQLException {
 		if (corso == null || corso.getIdCorso() == null) {
             throw new IllegalArgumentException("Corso o idCorso non valido");
         }

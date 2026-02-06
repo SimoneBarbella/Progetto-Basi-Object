@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GestoreRicette {
 
-    private static GestoreRicette instance;
+    private static GestoreRicette instanza;
 
     private final RicettaDao ricettaDao;
     private final IngredienteDao ingredienteDao;
@@ -22,16 +22,16 @@ public class GestoreRicette {
         this.ingredienteDao = new IngredienteDao();
     }
 
-    public static synchronized GestoreRicette getInstance() {
-        if (instance == null) {
-            instance = new GestoreRicette();
+    public static synchronized GestoreRicette getInstanza() {
+        if (instanza == null) {
+            instanza = new GestoreRicette();
         }
-        return instance;
+        return instanza;
     }
 
     public List<Ricetta> getRicetteDisponibili() {
         try {
-            return ricettaDao.findAll();
+            return ricettaDao.cercaTutti();
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento ricette", e);
         }
@@ -39,7 +39,7 @@ public class GestoreRicette {
 
     public List<Ingrediente> getIngredientiDisponibili() {
         try {
-            return ingredienteDao.findAll();
+            return ingredienteDao.cercaTutti();
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento ingredienti", e);
         }
@@ -47,7 +47,7 @@ public class GestoreRicette {
 
     public List<Ricetta> getRicettePerSessione(int idSessione) {
         try {
-            return ricettaDao.findBySessioneId(idSessione);
+            return ricettaDao.cercaPerSessioneId(idSessione);
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento ricette della sessione", e);
         }
@@ -55,7 +55,7 @@ public class GestoreRicette {
 
     public Ricetta creaRicetta(String nome, String descrizione, LocalTime tempo) {
         try {
-            return ricettaDao.insertRicetta(nome, descrizione, tempo);
+            return ricettaDao.inserisciRicetta(nome, descrizione, tempo);
         } catch (SQLException e) {
             throw new RuntimeException("Errore creazione ricetta", e);
         }
@@ -64,15 +64,15 @@ public class GestoreRicette {
     public Ricetta creaRicettaConIngredienti(String nome, String descrizione, LocalTime tempo,
                                              List<IngredienteQuantita> ingredienti) {
         try {
-            Ricetta ricetta = ricettaDao.insertRicetta(nome, descrizione, tempo);
+            Ricetta ricetta = ricettaDao.inserisciRicetta(nome, descrizione, tempo);
             if (ricetta == null || ricetta.getIdRicetta() == null) {
                 throw new RuntimeException("Ricetta non creata");
             }
             if (ingredienti != null) {
                 for (IngredienteQuantita iq : ingredienti) {
                     if (iq == null || iq.getNome() == null || iq.getNome().isBlank()) continue;
-                    ingredienteDao.ensureIngrediente(iq.getNome(), iq.getUnita());
-                    ricettaDao.addRichiede(ricetta.getIdRicetta(), iq.getNome(), iq.getQuantita());
+                    ingredienteDao.controllaIngrediente(iq.getNome(), iq.getUnita());
+                    ricettaDao.aggiungiRichiede(ricetta.getIdRicetta(), iq.getNome(), iq.getQuantita());
                 }
             }
             return ricetta;
@@ -83,7 +83,7 @@ public class GestoreRicette {
 
     public List<IngredienteQuantita> getIngredientiPerRicetta(int idRicetta) {
         try {
-            return ricettaDao.findIngredientiByRicettaId(idRicetta);
+            return ricettaDao.cercaIngredientiPerRicettaId(idRicetta);
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento ingredienti ricetta", e);
         }
@@ -91,7 +91,7 @@ public class GestoreRicette {
 
     public void associaRicettaSessione(int idSessione, int idRicetta) {
         try {
-            ricettaDao.linkRicettaToSessione(idSessione, idRicetta);
+            ricettaDao.collegaRicettaASessione(idSessione, idRicetta);
         } catch (SQLException e) {
             throw new RuntimeException("Errore associazione ricetta-sessione", e);
         }
@@ -99,7 +99,7 @@ public class GestoreRicette {
 
     public void disassociaRicettaSessione(int idSessione, int idRicetta) {
         try {
-            ricettaDao.unlinkRicettaFromSessione(idSessione, idRicetta);
+            ricettaDao.scollegaRicettaDaSessione(idSessione, idRicetta);
         } catch (SQLException e) {
             throw new RuntimeException("Errore rimozione ricetta dalla sessione", e);
         }

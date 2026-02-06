@@ -31,32 +31,32 @@ public class ReportBoundary {
         if (chefLabel != null && chef != null) {
             chefLabel.setText(chef.getNome() != null ? chef.getNome() : chef.getEmail());
         }
-        refreshCharts();
+        aggiornaCharts();
     }
 
     @FXML
     private void onAggiornaClick(ActionEvent event) {
-        refreshCharts();
+        aggiornaCharts();
     }
 
-    private void refreshCharts() {
+    private void aggiornaCharts() {
         if (chef == null) {
             showWarning("Chef non valido.");
             return;
         }
 
         try {
-            Map<String, Integer> sessioni = GestoreReport.getInstance().getSessioniStats(chef);
-            double[] ricetteStats = GestoreReport.getInstance().getRicetteStats(chef);
+            Map<String, Integer> sessioni = GestoreReport.getInstanza().getSessioniStats(chef);
+            double[] ricetteStats = GestoreReport.getInstanza().getRicetteStats(chef);
 
-            refreshPie(sessioni);
-            refreshBar(ricetteStats);
+            aggiornaPie(sessioni);
+            aggiornaBar(ricetteStats);
         } catch (RuntimeException ex) {
             showError(ex.getMessage());
         }
     }
 
-    private void refreshPie(Map<String, Integer> stats) {
+    private void aggiornaPie(Map<String, Integer> stats) {
         if (sessioniPieChart == null) return;
 
         int online = 0;
@@ -74,7 +74,7 @@ public class ReportBoundary {
         sessioniPieChart.setLabelsVisible(true);
     }
 
-    private void refreshBar(double[] stats) {
+    private void aggiornaBar(double[] stats) {
         if (ricetteBarChart == null) return;
 
         double min = (stats != null && stats.length > 0) ? stats[0] : 0;

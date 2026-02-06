@@ -203,6 +203,7 @@ FOR EACH ROW EXECUTE FUNCTION check_specializzazione();
 CREATE OR REPLACE FUNCTION check_gestisce() RETURNS TRIGGER AS $$
 DECLARE
     t tipo_utente_enum;
+    corso_data DATE;
 BEGIN
     SELECT tipo_utente INTO t FROM Utente WHERE email = NEW.email_chef;
     IF t IS NULL THEN
@@ -211,6 +212,38 @@ BEGIN
     IF t = 'studente' THEN
         RAISE EXCEPTION 'Solo chef/chefStudente possono gestire corsi (%).', NEW.email_chef;
     END IF;
+
+    -- Verifica che il corso esista e recupera la sua data di inizio
+    SELECT data_inizio INTO corso_data FROM Corso WHERE id_corso = NEW.id_corso;
+    IF corso_data IS NULL THEN
+        RAISE EXCEPTION 'Corso % inesistente', NEW.id_corso;
+    END IF;
+
+    -- Impedisci che lo stesso chef gestisca un altro corso con la stessa data_inizio
+    IF EXISTS (
+        SELECT 1
+        FROM Gestisce g
+        JOIN Corso c ON g.id_corso = c.id_corso
+        WHERE g.email_chef = NEW.email_chef
+          AND c.data_inizio = corso_data
+          AND g.id_corso <> NEW.id_corso
+    ) THEN
+        RAISE EXCEPTION 'Chef % già gestisce un corso nella data %', NEW.email_chef, corso_data;
+    END IF;
+
+    -- Impedisci che lo stesso chef abbia due sessioni in giorni uguali
+    IF EXISTS (
+        SELECT 1
+        FROM Sessione s_new
+        JOIN Sessione s_other ON date(s_new.ora_inizio) = date(s_other.ora_inizio)
+        JOIN Gestisce g_other ON g_other.id_corso = s_other.id_corso
+        WHERE s_new.id_corso = NEW.id_corso
+          AND g_other.email_chef = NEW.email_chef
+          AND g_other.id_corso <> NEW.id_corso
+    ) THEN
+        RAISE EXCEPTION 'Chef % già ha una sessione in quel giorno per un altro corso', NEW.email_chef;
+    END IF;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

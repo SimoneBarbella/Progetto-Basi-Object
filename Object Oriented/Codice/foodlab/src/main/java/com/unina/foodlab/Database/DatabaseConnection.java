@@ -43,7 +43,7 @@ public class DatabaseConnection {
     }
 
     // Metodo statico per ottenere l'unica istanza
-    public static DatabaseConnection getInstance() {
+    public static DatabaseConnection getInstanza() {
         if (istanza == null) {
             istanza = new DatabaseConnection();
         }

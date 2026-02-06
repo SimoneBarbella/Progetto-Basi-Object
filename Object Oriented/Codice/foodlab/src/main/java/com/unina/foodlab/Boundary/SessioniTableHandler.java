@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-final class SessioniPraticheTableController {
+final class SessioniTableHandler {
 
     private final TableView<SessionePresenza> sessioniTable;
     private final TableColumn<SessionePresenza, String> dataCol;
@@ -32,22 +32,22 @@ final class SessioniPraticheTableController {
     private final Map<Integer, String> ricettePerSessione = new HashMap<>();
     private final Map<Integer, String> quantitaTotalePerSessione = new HashMap<>();
 
-    private final Consumer<SessionePresenza> onOpenListaSpesa;
+    private final Consumer<SessionePresenza> onApriListaSpesa;
 
-    SessioniPraticheTableController(
+    SessioniTableHandler(
         TableView<SessionePresenza> sessioniTable,
         TableColumn<SessionePresenza, String> dataCol,
         TableColumn<SessionePresenza, Integer> aderentiCol,
         TableColumn<SessionePresenza, String> ricetteCol,
         TableColumn<SessionePresenza, String> quantitaTotaleCol,
-        Consumer<SessionePresenza> onOpenListaSpesa
+        Consumer<SessionePresenza> onApriListaSpesa
     ) {
         this.sessioniTable = sessioniTable;
         this.dataCol = dataCol;
         this.aderentiCol = aderentiCol;
         this.ricetteCol = ricetteCol;
         this.quantitaTotaleCol = quantitaTotaleCol;
-        this.onOpenListaSpesa = onOpenListaSpesa;
+        this.onApriListaSpesa = onApriListaSpesa;
     }
 
     void initialize(Consumer<SessionePresenza> onSelectionChanged) {
@@ -55,22 +55,22 @@ final class SessioniPraticheTableController {
         setupSelectionListeners(onSelectionChanged);
     }
 
-    SessionePresenza loadAndApply(Corso corso, SessionePresenza currentlySelected) {
+    SessionePresenza caricaEApplica(Corso corso, SessionePresenza currentlySelected) {
         if (corso == null) return null;
 
         Integer previousSelectedSessionId = currentlySelected != null ? currentlySelected.getIdSessione() : null;
 
-        List<Sessione> sessioni = GestoreSessioni.getInstance().getSessioniByCorso(corso);
+        List<Sessione> sessioni = GestoreSessioni.getInstanza().getSessioniByCorso(corso);
         List<SessionePresenza> pratiche = sessioni.stream()
             .filter(s -> s instanceof SessionePresenza)
             .map(s -> (SessionePresenza) s)
             .collect(Collectors.toList());
 
-        refreshDerivedData(pratiche);
+        aggiornaDatiDerivati(pratiche);
 
         if (sessioniTable != null) {
             sessioniTable.setItems(FXCollections.observableArrayList(pratiche));
-            restoreSelection(pratiche, previousSelectedSessionId);
+            ripristinaSelezione(pratiche, previousSelectedSessionId);
             sessioniTable.refresh();
             return sessioniTable.getSelectionModel().getSelectedItem();
         }
@@ -102,7 +102,7 @@ final class SessioniPraticheTableController {
                 String val = (id != null) ? quantitaTotalePerSessione.getOrDefault(id, "") : "";
                 return new SimpleStringProperty(val);
             });
-            quantitaTotaleCol.setCellFactory(col -> new QuantitaTotaleButtonCell(onOpenListaSpesa));
+            quantitaTotaleCol.setCellFactory(col -> new QuantitaTotaleButtonCell(onApriListaSpesa));
         }
     }
 
@@ -113,7 +113,7 @@ final class SessioniPraticheTableController {
         sessioniTable.setOnMouseClicked(e -> onSelectionChanged.accept(sessioniTable.getSelectionModel().getSelectedItem()));
     }
 
-    private void restoreSelection(List<SessionePresenza> pratiche, Integer previousSelectedSessionId) {
+    private void ripristinaSelezione(List<SessionePresenza> pratiche, Integer previousSelectedSessionId) {
         if (sessioniTable == null) return;
         if (pratiche == null || pratiche.isEmpty()) return;
 
@@ -132,7 +132,7 @@ final class SessioniPraticheTableController {
         }
     }
 
-    private void refreshDerivedData(List<SessionePresenza> sessioni) {
+    private void aggiornaDatiDerivati(List<SessionePresenza> sessioni) {
         ricettePerSessione.clear();
         quantitaTotalePerSessione.clear();
         if (sessioni == null) return;
@@ -141,14 +141,14 @@ final class SessioniPraticheTableController {
             Integer id = s.getIdSessione();
             if (id == null) continue;
 
-            List<Ricetta> ricette = GestoreRicette.getInstance().getRicettePerSessione(id);
+            List<Ricetta> ricette = GestoreRicette.getInstanza().getRicettePerSessione(id);
             String nomi = ricette.stream()
                 .map(Ricetta::getNome)
                 .filter(n -> n != null && !n.isBlank())
                 .collect(Collectors.joining(", "));
             ricettePerSessione.put(id, nomi);
 
-            java.math.BigDecimal tot = GestoreSessioni.getInstance().getQuantitaTotaleBySessioneId(id);
+            java.math.BigDecimal tot = GestoreSessioni.getInstanza().getQuantitaTotaleBySessioneId(id);
             String totStr = tot != null ? tot.stripTrailingZeros().toPlainString() : "0";
             quantitaTotalePerSessione.put(id, totStr);
         }

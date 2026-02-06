@@ -55,7 +55,7 @@ public class RicettaListCell extends ListCell<Ricetta> {
                 return;
             }
             try {
-                GestoreRicette.getInstance().disassociaRicettaSessione(idSessione, item.getIdRicetta());
+                GestoreRicette.getInstanza().disassociaRicettaSessione(idSessione, item.getIdRicetta());
                 onReload.run();
             } catch (RuntimeException ex) {
                 onError.accept(ex.getMessage());

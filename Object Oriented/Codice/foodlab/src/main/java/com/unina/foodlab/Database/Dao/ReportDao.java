@@ -14,7 +14,7 @@ public class ReportDao {
     private final Connection conn;
 
     public ReportDao() {
-        this.conn = DatabaseConnection.getInstance().getConnection();
+        this.conn = DatabaseConnection.getInstanza().getConnection();
     }
 
     public int contaCorsi(String emailChef) throws SQLException {

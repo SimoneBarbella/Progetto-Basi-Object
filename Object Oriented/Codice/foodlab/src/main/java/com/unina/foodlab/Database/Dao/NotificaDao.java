@@ -18,10 +18,10 @@ public class NotificaDao {
     private final Connection conn;
 
     public NotificaDao() {
-        this.conn = DatabaseConnection.getInstance().getConnection();
+        this.conn = DatabaseConnection.getInstanza().getConnection();
     }
 
-    public List<Notifica> findByChefEmail(String emailChef) throws SQLException {
+    public List<Notifica> cercaPerEmailChef(String emailChef) throws SQLException {
         if (emailChef == null || emailChef.isBlank()) {
             throw new IllegalArgumentException("emailChef non valida");
         }
@@ -57,7 +57,7 @@ public class NotificaDao {
         return result;
     }
 
-    public Notifica insertNotifica(String emailChef, String messaggio, Integer idCorso) throws SQLException {
+    public Notifica inserisciNotifica(String emailChef, String messaggio, Integer idCorso) throws SQLException {
         if (emailChef == null || emailChef.isBlank()) {
             throw new IllegalArgumentException("emailChef non valida");
         }
@@ -93,7 +93,7 @@ public class NotificaDao {
         }
     }
 
-    public boolean deleteById(int idNotifica) throws SQLException {
+    public boolean eliminaPerId(int idNotifica) throws SQLException {
         String sql = "DELETE FROM uninafoodlab.Notifica WHERE id_notifica = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idNotifica);

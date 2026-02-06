@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GestoreNotifiche {
 
-    private static GestoreNotifiche instance;
+    private static GestoreNotifiche instanza;
 
     private final NotificaDao notificaDao;
 
@@ -17,11 +17,11 @@ public class GestoreNotifiche {
         this.notificaDao = new NotificaDao();
     }
 
-    public static synchronized GestoreNotifiche getInstance() {
-        if (instance == null) {
-            instance = new GestoreNotifiche();
+    public static synchronized GestoreNotifiche getInstanza() {
+        if (instanza == null) {
+            instanza = new GestoreNotifiche();
         }
-        return instance;
+        return instanza;
     }
 
     public List<Notifica> getNotifiche(Chef chef) {
@@ -29,7 +29,7 @@ public class GestoreNotifiche {
             throw new IllegalArgumentException("Chef non valido");
         }
         try {
-            return notificaDao.findByChefEmail(chef.getEmail());
+            return notificaDao.cercaPerEmailChef(chef.getEmail());
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento notifiche", e);
         }
@@ -40,7 +40,7 @@ public class GestoreNotifiche {
             throw new IllegalArgumentException("Chef non valido");
         }
         try {
-            return notificaDao.insertNotifica(chef.getEmail(), messaggio, idCorso);
+            return notificaDao.inserisciNotifica(chef.getEmail(), messaggio, idCorso);
         } catch (SQLException e) {
             throw new RuntimeException("Errore invio notifica", e);
         }
@@ -48,7 +48,7 @@ public class GestoreNotifiche {
 
     public void eliminaNotifica(int idNotifica) {
         try {
-            notificaDao.deleteById(idNotifica);
+            notificaDao.eliminaPerId(idNotifica);
         } catch (SQLException e) {
             throw new RuntimeException("Errore eliminazione notifica", e);
         }

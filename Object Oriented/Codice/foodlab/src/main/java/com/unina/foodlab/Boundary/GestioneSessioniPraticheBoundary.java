@@ -7,6 +7,7 @@ import com.unina.foodlab.Entity.Ricetta;
 import com.unina.foodlab.Entity.SessionePresenza;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
@@ -57,10 +58,10 @@ public class GestioneSessioniPraticheBoundary {
     private TextField ingredienteQuantitaField;
 
     @FXML
-    private javafx.scene.control.Button creaRicettaButton;
+    private Button creaRicettaButton;
 
     @FXML
-    private javafx.scene.control.Button aggiungiIngredienteButton;
+    private Button aggiungiIngredienteButton;
 
     @FXML
     private Label ingredientiTitoloLabel;
@@ -72,7 +73,7 @@ public class GestioneSessioniPraticheBoundary {
     private ListView<Ricetta> ricetteListView;
 
     @FXML
-    private javafx.scene.control.Button dettaglioRicettaButton;
+    private Button dettaglioRicettaButton;
 
     @FXML
     private HBox ricetteActionsBox;
@@ -112,17 +113,19 @@ public class GestioneSessioniPraticheBoundary {
         }
     }
 
+    
+
     @FXML
-    private void onCreateRicettaClick(ActionEvent event) {
+    private void onCreaRicettaClick(ActionEvent event) {
         if (coordinator != null) {
-            coordinator.onCreateRicettaClick(event);
+            coordinator.onCreaRicettaClick(event);
         }
     }
 
     @FXML
-    private void onAddIngredienteClick(ActionEvent event) {
+    private void onAggiungiIngredienteClick(ActionEvent event) {
         if (coordinator != null) {
-            coordinator.onAddIngredienteClick(event);
+            coordinator.onAggiungiIngredienteClick(event);
         }
     }
 

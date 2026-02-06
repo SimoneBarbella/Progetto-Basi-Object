@@ -13,7 +13,7 @@ import java.util.List;
 
 public class GestoreSessioni {
 
-    private static GestoreSessioni instance;
+    private static GestoreSessioni instanza;
 
     private final SessioneDao sessioneDao;
 
@@ -21,11 +21,11 @@ public class GestoreSessioni {
         this.sessioneDao = new SessioneDao();
     }
 
-    public static synchronized GestoreSessioni getInstance() {
-        if (instance == null) {
-            instance = new GestoreSessioni();
+    public static synchronized GestoreSessioni getInstanza() {
+        if (instanza == null) {
+            instanza = new GestoreSessioni();
         }
-        return instance;
+        return instanza;
     }
 
     public List<Sessione> getSessioniByCorso(Corso corso) {
@@ -33,7 +33,7 @@ public class GestoreSessioni {
             throw new IllegalArgumentException("Corso non può essere null");
         }
         try {
-            return sessioneDao.findByCorso(corso);
+            return sessioneDao.cercaPerCorso(corso);
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento sessioni del corso", e);
         }
@@ -41,15 +41,21 @@ public class GestoreSessioni {
 
     public List<Sessione> getSessioniByCorsoId(int idCorso) {
         try {
-            return sessioneDao.findByCorsoId(idCorso);
+            return sessioneDao.cercaPerCorsoId(idCorso);
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento sessioni del corso", e);
         }
     }
 
     public void creaSessione(Corso corso, LocalDateTime data, TipoSessione tipo, String teoria) {
+        if (corso == null) {
+            throw new IllegalArgumentException("Corso non può essere null");
+        }
+        if (corso.getDataInizio() != null && data.toLocalDate().isBefore(corso.getDataInizio())) {
+            throw new IllegalArgumentException("La data della sessione non può essere precedente alla data d'inizio del corso.");
+        }
         try {
-            sessioneDao.insertSessione(corso, data, tipo, teoria);
+            sessioneDao.inserisciSessione(corso, data, tipo, teoria);
         } catch (SQLException e) {
             throw new RuntimeException("Errore creazione sessione", e);
         }

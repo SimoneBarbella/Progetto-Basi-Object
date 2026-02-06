@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class GestoreReport {
 
-    private static GestoreReport instance;
+    private static GestoreReport instanza;
 
     private final ReportDao reportDao;
 
@@ -16,11 +16,11 @@ public class GestoreReport {
         this.reportDao = new ReportDao();
     }
 
-    public static synchronized GestoreReport getInstance() {
-        if (instance == null) {
-            instance = new GestoreReport();
+    public static synchronized GestoreReport getInstanza() {
+        if (instanza == null) {
+            instanza = new GestoreReport();
         }
-        return instance;
+        return instanza;
     }
 
     public int getNumeroCorsi(Chef chef) {

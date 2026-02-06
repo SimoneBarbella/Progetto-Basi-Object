@@ -15,10 +15,10 @@ public class IngredienteDao {
     private final Connection conn;
 
     public IngredienteDao() {
-        this.conn = DatabaseConnection.getInstance().getConnection();
+        this.conn = DatabaseConnection.getInstanza().getConnection();
     }
 
-    public List<Ingrediente> findAll() throws SQLException {
+    public List<Ingrediente> cercaTutti() throws SQLException {
         String sql = "SELECT nome, unita_di_misura FROM Ingrediente ORDER BY nome";
         List<Ingrediente> result = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -33,7 +33,7 @@ public class IngredienteDao {
         return result;
     }
 
-    public void ensureIngrediente(String nome, String unita) throws SQLException {
+    public void controllaIngrediente(String nome, String unita) throws SQLException {
         String sql = "INSERT INTO Ingrediente(nome, unita_di_misura) VALUES (?, ?) ON CONFLICT (nome) DO NOTHING";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nome);

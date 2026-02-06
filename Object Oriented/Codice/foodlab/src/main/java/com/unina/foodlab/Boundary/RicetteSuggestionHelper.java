@@ -1,5 +1,6 @@
 package com.unina.foodlab.Boundary;
 
+import com.unina.foodlab.Boundary.util.FxSuggestions;
 import com.unina.foodlab.Boundary.util.FxTypeAhead;
 import com.unina.foodlab.Entity.Ingrediente;
 import com.unina.foodlab.Entity.Ricetta;
@@ -13,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-final class RicetteIngredientiTypeAheadController {
+final class RicetteSuggestionHelper {
 
     private final TextField nuovaRicettaNomeField;
     private final ContextMenu nuoveRicetteSuggestMenu;
@@ -36,7 +37,7 @@ final class RicetteIngredientiTypeAheadController {
     private FxTypeAhead<Ricetta> ricetteTypeAhead;
     private FxTypeAhead<Ingrediente> ingredientiTypeAhead;
 
-    RicetteIngredientiTypeAheadController(
+    RicetteSuggestionHelper(
         TextField nuovaRicettaNomeField,
         ContextMenu nuoveRicetteSuggestMenu,
         Supplier<List<Ricetta>> ricetteDisponibili,
@@ -122,6 +123,6 @@ final class RicetteIngredientiTypeAheadController {
     }
 
     private static String normalizeKey(String s) {
-        return com.unina.foodlab.Boundary.util.FxSuggestions.normalizeKey(s);
+        return FxSuggestions.normalizeKey(s);
     }
 }

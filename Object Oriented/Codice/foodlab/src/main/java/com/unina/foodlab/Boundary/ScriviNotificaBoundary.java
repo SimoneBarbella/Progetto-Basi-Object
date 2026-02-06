@@ -43,10 +43,10 @@ public class ScriviNotificaBoundary {
             chefLabel.setText(nome != null && !nome.isBlank() ? nome : chef.getEmail());
         }
 
-        loadCorsiChoices();
+        caricaScelteCorsi();
     }
 
-    private void loadCorsiChoices() {
+    private void caricaScelteCorsi() {
         if (corsoCombo == null) return;
 
         corsoCombo.getItems().clear();
@@ -58,7 +58,7 @@ public class ScriviNotificaBoundary {
         }
 
         try {
-            List<Corso> corsi = GestoreCorsi.getInstance().getCorsiGestiti(chef);
+            List<Corso> corsi = GestoreCorsi.getInstanza().getCorsiGestiti(chef);
             for (Corso c : corsi) {
 				Integer id = c != null ? c.getIdCorso() : null;
                 String nome = c != null ? c.getNome() : null;
@@ -81,7 +81,7 @@ public class ScriviNotificaBoundary {
         }
 
         try {
-            GestoreNotifiche.getInstance().inviaNotifica(chef, input.messaggio(), input.idCorso());
+            GestoreNotifiche.getInstanza().inviaNotifica(chef, input.messaggio(), input.idCorso());
             showInfo("Notifica inviata.");
             goToNotifiche(event);
         } catch (RuntimeException ex) {

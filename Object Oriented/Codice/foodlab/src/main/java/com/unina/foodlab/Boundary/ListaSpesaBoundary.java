@@ -65,12 +65,12 @@ public class ListaSpesaBoundary {
         }
 
         if (sessione != null && sessione.getIdSessione() != null) {
-            List<IngredienteQuantita> lista = GestoreSessioni.getInstance().getListaSpesaBySessioneId(sessione.getIdSessione());
+            List<IngredienteQuantita> lista = GestoreSessioni.getInstanza().getListaSpesaBySessioneId(sessione.getIdSessione());
             if (spesaListView != null) {
                 spesaListView.setItems(javafx.collections.FXCollections.observableArrayList(lista));
             }
             if (totaleLabel != null) {
-                java.math.BigDecimal tot = GestoreSessioni.getInstance().getQuantitaTotaleBySessioneId(sessione.getIdSessione());
+                java.math.BigDecimal tot = GestoreSessioni.getInstanza().getQuantitaTotaleBySessioneId(sessione.getIdSessione());
                 String totStr = tot != null ? tot.stripTrailingZeros().toPlainString() : "0";
                 totaleLabel.setText("Totale: " + totStr);
             }

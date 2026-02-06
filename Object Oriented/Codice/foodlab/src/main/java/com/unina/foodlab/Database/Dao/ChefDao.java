@@ -18,7 +18,7 @@ public class ChefDao {
     private Connection conn;
 
     public ChefDao() {
-        this.conn = DatabaseConnection.getInstance().getConnection();
+        this.conn = DatabaseConnection.getInstanza().getConnection();
     }
 
     private TipoUtente mapTipoUtente(String dbVal) {
@@ -29,7 +29,7 @@ public class ChefDao {
         return null;
     }
 
-    public List<Chef> findAll() throws SQLException {
+    public List<Chef> cercaTutti() throws SQLException {
         String sql = "SELECT u.email, u.nome, u.cognome, u.password, u.tipo_utente, "
                 + "STRING_AGG(sc.specializzazione, ',') AS specializzazioni "
                 + "FROM Utente u LEFT JOIN Specializzazione_Chef sc ON u.email = sc.email_chef "
@@ -53,7 +53,7 @@ public class ChefDao {
         return res;
     }
 
-    public Optional<Chef> findByEmail(String email) throws SQLException {
+    public Optional<Chef> cercaPerEmail(String email) throws SQLException {
         String sql = "SELECT u.email, u.nome, u.cognome, u.password, u.tipo_utente, "
                 + "STRING_AGG(sc.specializzazione, ',') AS specializzazioni "
                 + "FROM Utente u LEFT JOIN Specializzazione_Chef sc ON u.email = sc.email_chef "
@@ -79,7 +79,7 @@ public class ChefDao {
         return Optional.empty();
     }
 
-    public boolean save(Chef chef) throws SQLException {
+    public boolean salva(Chef chef) throws SQLException {
         String insertUtente = "INSERT INTO Utente(email,nome,cognome,password,tipo_utente) VALUES(?,?,?,?,?)";
         try (PreparedStatement ps = conn.prepareStatement(insertUtente)) {
             ps.setString(1, chef.getEmail());
@@ -110,7 +110,7 @@ public class ChefDao {
         return true;
     }
 
-    public boolean update(Chef chef) throws SQLException {
+    public boolean aggiorna(Chef chef) throws SQLException {
         String updateUtente = "UPDATE Utente SET nome = ?, cognome = ?, password = ?, tipo_utente = ? WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(updateUtente)) {
             ps.setString(1, chef.getNome());
@@ -145,7 +145,7 @@ public class ChefDao {
         return true;
     }
 
-    public boolean deleteByEmail(String email) throws SQLException {
+    public boolean eliminaPerEmail(String email) throws SQLException {
         String deleteUtente = "DELETE FROM Utente WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(deleteUtente)) {
             ps.setString(1, email);

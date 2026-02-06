@@ -28,8 +28,8 @@ final class GestioneSessioniPraticheCoordinator {
     private Chef chef;
     private SessionePresenza sessioneSelezionata;
 
-    private final SessioniPraticheTableController tableController;
-    private final RicetteIngredientiSectionController sectionController;
+    private final SessioniTableHandler tableController;
+    private final RicetteIngredientiSectionUI sectionController;
 
     GestioneSessioniPraticheCoordinator(
         Label corsoLabel,
@@ -57,16 +57,16 @@ final class GestioneSessioniPraticheCoordinator {
         this.sessioniTable = sessioniTable;
         this.ricetteListView = ricetteListView;
 
-        this.tableController = new SessioniPraticheTableController(
+        this.tableController = new SessioniTableHandler(
             sessioniTable,
             dataCol,
             aderentiCol,
             ricetteCol,
             quantitaTotaleCol,
-            this::openListaSpesa
+            this::apriListaSpesa
         );
 
-        this.sectionController = new RicetteIngredientiSectionController(
+        this.sectionController = new RicetteIngredientiSectionUI(
             sessioneSelezionataLabel,
             nuovaRicettaNomeField,
             nuovaRicettaDescrField,
@@ -82,13 +82,13 @@ final class GestioneSessioniPraticheCoordinator {
             dettaglioRicettaButton,
             ricetteActionsBox,
             () -> sessioneSelezionata,
-            this::loadSessioniPratiche,
+            this::caricaSessioniPratiche,
             this::onDettaglioRicettaClick
         );
     }
 
     void initialize() {
-        tableController.initialize(this::onSessionSelected);
+        tableController.initialize(this::onSessioneSelezionata);
         sectionController.initialize();
     }
 
@@ -100,15 +100,15 @@ final class GestioneSessioniPraticheCoordinator {
 			Integer id = corso.getIdCorso();
             corsoLabel.setText(nome + (id != null ? " (ID " + id + ")" : ""));
         }
-        loadSessioniPratiche();
+        caricaSessioniPratiche();
     }
 
-    void onCreateRicettaClick(ActionEvent event) {
-        sectionController.onCreateRicettaClick(event, requireIdSessioneSelezionataOrWarn());
+    void onCreaRicettaClick(ActionEvent event) {
+        sectionController.onCreaRicettaClick(event, richiediIdSessioneSelezionataOAvvisa());
     }
 
-    void onAddIngredienteClick(ActionEvent event) {
-        sectionController.onAddIngredienteClick(event, requireIdSessioneSelezionataOrWarn());
+    void onAggiungiIngredienteClick(ActionEvent event) {
+        sectionController.onAggiungiIngredienteClick(event, richiediIdSessioneSelezionataOAvvisa());
     }
 
     void onBackClick(ActionEvent event) {
@@ -125,7 +125,7 @@ final class GestioneSessioniPraticheCoordinator {
     }
 
     void onDettaglioRicettaClick(ActionEvent event) {
-        if (requireIdSessioneSelezionataOrWarn() == null) return;
+        if (richiediIdSessioneSelezionataOAvvisa() == null) return;
         Ricetta selected = ricetteListView != null ? ricetteListView.getSelectionModel().getSelectedItem() : null;
 
         final SessionePresenza selectedSessione = sessioneSelezionata;
@@ -142,12 +142,12 @@ final class GestioneSessioniPraticheCoordinator {
         );
     }
 
-    private void loadSessioniPratiche() {
-        sessioneSelezionata = tableController.loadAndApply(corso, sessioneSelezionata);
-        sectionController.refreshMasters();
-        refreshSectionForSelectedSession();
+    private void caricaSessioniPratiche() {
+        sessioneSelezionata = tableController.caricaEApplica(corso, sessioneSelezionata);
+        sectionController.aggiornaMasters();
+        aggiornaSezionePerSessioneSelezionata();
     }
-    private Integer requireIdSessioneSelezionataOrWarn() {
+    private Integer richiediIdSessioneSelezionataOAvvisa() {
         Integer idSessione = sessioneSelezionata != null ? sessioneSelezionata.getIdSessione() : null;
         if (idSessione == null) {
             showRicettaWarning("Seleziona una sessione valida.");
@@ -155,21 +155,21 @@ final class GestioneSessioniPraticheCoordinator {
         return idSessione;
     }
 
-    private void onSessionSelected(SessionePresenza selected) {
+    private void onSessioneSelezionata(SessionePresenza selected) {
         sessioneSelezionata = selected;
-        refreshSectionForSelectedSession();
+        aggiornaSezionePerSessioneSelezionata();
     }
 
-    private void refreshSectionForSelectedSession() {
+    private void aggiornaSezionePerSessioneSelezionata() {
         Integer numeroCorso = null;
         if (sessioniTable != null && sessioniTable.getItems() != null && sessioneSelezionata != null) {
             int idx = sessioniTable.getItems().indexOf(sessioneSelezionata);
             numeroCorso = idx >= 0 ? idx + 1 : null;
         }
-        sectionController.refreshForSelection(sessioneSelezionata, numeroCorso);
+        sectionController.aggiornaPerSelezione(sessioneSelezionata, numeroCorso);
     }
 
-    private void openListaSpesa(SessionePresenza sessione) {
+    private void apriListaSpesa(SessionePresenza sessione) {
         if (sessione == null || sessione.getIdSessione() == null) {
             showRicettaWarning("Seleziona una sessione valida.");
             return;

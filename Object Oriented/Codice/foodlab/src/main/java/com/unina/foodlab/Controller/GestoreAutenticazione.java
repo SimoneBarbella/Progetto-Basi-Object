@@ -8,7 +8,7 @@ import com.unina.foodlab.Entity.Chef;
 
 public class GestoreAutenticazione {
 
-    private static GestoreAutenticazione instance;
+    private static GestoreAutenticazione instanza;
 
     private final ChefDao chefDao;
 
@@ -16,11 +16,11 @@ public class GestoreAutenticazione {
         this.chefDao = new ChefDao();
     }
 
-    public static synchronized GestoreAutenticazione getInstance() {
-        if (instance == null) {
-            instance = new GestoreAutenticazione();
+    public static synchronized GestoreAutenticazione getInstanza() {
+        if (instanza == null) {
+            instanza = new GestoreAutenticazione();
         }
-        return instance;
+        return instanza;
     }
 
     public Chef loginChef(String email, String password) {
@@ -29,7 +29,7 @@ public class GestoreAutenticazione {
         }
 
         try {
-            Optional<Chef> chefOpt = chefDao.findByEmail(email);
+            Optional<Chef> chefOpt = chefDao.cercaPerEmail(email);
             if (chefOpt.isEmpty()) {
                 return null;
             }

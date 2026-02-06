@@ -61,7 +61,7 @@
 
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <TextField fx:id="nuovaRicettaTempoField" promptText="Tempo (HH:mm:ss)" prefWidth="160" />
-                    <Button fx:id="creaRicettaButton" text="Aggiungi ricetta" onAction="#onCreateRicettaClick" styleClass="secondary-button" />
+                    <Button fx:id="creaRicettaButton" text="Aggiungi ricetta" onAction="#onCreaRicettaClick" styleClass="secondary-button" />
                 </HBox>
 
                 <Label fx:id="sessioneSelezionataLabel" text="Ricette della sessione" styleClass="section-title" />
@@ -78,7 +78,7 @@
 
                 <HBox alignment="CENTER_LEFT" spacing="12">
                     <TextField fx:id="ingredienteQuantitaField" promptText="Quantità" prefWidth="120" />
-                    <Button fx:id="aggiungiIngredienteButton" text="Aggiungi ingrediente" onAction="#onAddIngredienteClick" styleClass="secondary-button" />
+                    <Button fx:id="aggiungiIngredienteButton" text="Aggiungi ingrediente" onAction="#onAggiungiIngredienteClick" styleClass="secondary-button" />
                 </HBox>
 
                 <Label fx:id="ingredientiTitoloLabel" text="Ingredienti della ricetta" styleClass="section-title" visible="false" managed="false" />

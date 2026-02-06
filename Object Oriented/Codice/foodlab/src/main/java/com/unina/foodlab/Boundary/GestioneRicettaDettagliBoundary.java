@@ -88,7 +88,7 @@ public class GestioneRicettaDettagliBoundary {
 
         List<Ricetta> ricette;
         if (sessione != null && sessione.getIdSessione() != null) {
-            ricette = GestoreRicette.getInstance().getRicettePerSessione(sessione.getIdSessione());
+            ricette = GestoreRicette.getInstanza().getRicettePerSessione(sessione.getIdSessione());
         } else if (preselect != null) {
             ricette = java.util.List.of(preselect);
         } else {
@@ -102,7 +102,7 @@ public class GestioneRicettaDettagliBoundary {
         }
 
         ricetteListView.setItems(javafx.collections.FXCollections.observableArrayList(ricette));
-        selectRicettaIfPresent(ricette, preselect);
+        selezionaRicettaSePresente(ricette, preselect);
 
         if (!ricetteListView.getItems().isEmpty() && ricetteListView.getSelectionModel().getSelectedItem() == null) {
             ricetteListView.getSelectionModel().selectFirst();
@@ -122,7 +122,7 @@ public class GestioneRicettaDettagliBoundary {
         }
 
         if (ingredientiListView != null) {
-            loadIngredienti(ricetta);
+            caricaIngredienti(ricetta);
         }
     }
 
@@ -150,7 +150,7 @@ public class GestioneRicettaDettagliBoundary {
         corsoLabel.setText(nome + (id != null ? " (ID " + id + ")" : ""));
     }
 
-    private void selectRicettaIfPresent(List<Ricetta> ricette, Ricetta preselect) {
+    private void selezionaRicettaSePresente(List<Ricetta> ricette, Ricetta preselect) {
         if (preselect == null || ricetteListView == null) {
             return;
         }
@@ -162,7 +162,7 @@ public class GestioneRicettaDettagliBoundary {
         }
     }
 
-    private void loadIngredienti(Ricetta ricetta) {
+    private void caricaIngredienti(Ricetta ricetta) {
         if (ingredientiListView == null) {
             return;
         }
@@ -170,7 +170,7 @@ public class GestioneRicettaDettagliBoundary {
             ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList());
             return;
         }
-        List<IngredienteQuantita> ingredienti = GestoreRicette.getInstance().getIngredientiPerRicetta(ricetta.getIdRicetta());
+        List<IngredienteQuantita> ingredienti = GestoreRicette.getInstanza().getIngredientiPerRicetta(ricetta.getIdRicetta());
         ingredientiListView.setItems(javafx.collections.FXCollections.observableArrayList(ingredienti));
     }
 

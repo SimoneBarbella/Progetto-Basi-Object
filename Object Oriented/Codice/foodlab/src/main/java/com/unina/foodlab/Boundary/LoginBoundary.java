@@ -46,7 +46,7 @@ public class LoginBoundary {
 
         Chef chef = null;
         try {
-            chef = GestoreAutenticazione.getInstance().loginChef(email, password);
+            chef = GestoreAutenticazione.getInstanza().loginChef(email, password);
             if (chef == null) {
                 if (errorLabel != null) {
                     errorLabel.setTextFill(Color.web("#d32f2f"));
@@ -67,7 +67,7 @@ public class LoginBoundary {
             System.err.println("[LoginBoundary] Errore runtime durante il login: " + ex.getMessage());
             ex.printStackTrace();
 
-            String userHint = userHintForLoginException(ex);
+            String userHint = suggerimentoUtentePerEccezioneLogin(ex);
 
             if (errorLabel != null) {
                 errorLabel.setTextFill(Color.web("#d32f2f"));
@@ -108,7 +108,7 @@ public class LoginBoundary {
         }
     }
 
-    private static String userHintForLoginException(RuntimeException ex) {
+    private static String suggerimentoUtentePerEccezioneLogin(RuntimeException ex) {
         String msg = ex != null ? ex.getMessage() : null;
         String rootMsg = UtilEccezioni.rootCauseMessageOrNull(ex);
 

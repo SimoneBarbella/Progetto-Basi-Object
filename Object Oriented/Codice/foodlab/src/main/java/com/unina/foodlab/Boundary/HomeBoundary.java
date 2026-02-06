@@ -1,15 +1,23 @@
 package com.unina.foodlab.Boundary;
 
-import com.unina.foodlab.Controller.GestoreCorsi;
 import com.unina.foodlab.Boundary.util.InterfacciaFx;
 import com.unina.foodlab.Boundary.util.NavigatoreScene;
+import com.unina.foodlab.Controller.GestoreCorsi;
 import com.unina.foodlab.Entity.Chef;
 import com.unina.foodlab.Entity.Corso;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+
+import java.time.LocalDate;
 
 public class HomeBoundary {
 
@@ -17,28 +25,28 @@ public class HomeBoundary {
     private Label welcomeLabel;
 
     @FXML
-    private javafx.scene.control.TableView<Corso> corsiTable;
+    private TableView<Corso> corsiTable;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, String> idCol;
+    private TableColumn<Corso, String> idCol;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, String> nomeCol;
+    private TableColumn<Corso, String> nomeCol;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, java.time.LocalDate> dataCol;
+    private TableColumn<Corso, LocalDate> dataCol;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, String> frequenzaCol;
+    private TableColumn<Corso, String> frequenzaCol;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, Integer> sessioniCol;
+    private TableColumn<Corso, Integer> sessioniCol;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, Integer> partecipantiCol;
+    private TableColumn<Corso, Integer> partecipantiCol;
 
     @FXML
-    private javafx.scene.control.TableColumn<Corso, String> categorieCol;
+    private TableColumn<Corso, String> categorieCol;
 
     @FXML
     private Button gestisciSessioniButton;
@@ -51,18 +59,18 @@ public class HomeBoundary {
     @FXML
     private void initialize() {
         if (corsiTable != null) {
-            corsiTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.SINGLE);
-            updateGestioneSessioniButtons(true);
+            corsiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+            aggiornaGestioneSessioniButtons(true);
             corsiTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                updateGestioneSessioniButtons(newVal == null);
+                aggiornaGestioneSessioniButtons(newVal == null);
             });
             corsiTable.setOnMouseClicked(e -> {
-                updateGestioneSessioniButtons(corsiTable.getSelectionModel().getSelectedItem() == null);
+                aggiornaGestioneSessioniButtons(corsiTable.getSelectionModel().getSelectedItem() == null);
             });
         }
     }
 
-    private void updateGestioneSessioniButtons(boolean disable) {
+    private void aggiornaGestioneSessioniButtons(boolean disable) {
         if (gestisciSessioniButton != null) {
             gestisciSessioniButton.setDisable(disable);
         }
@@ -74,13 +82,13 @@ public class HomeBoundary {
     public void initData(Chef chef) {
         this.chef = chef;
         if (welcomeLabel != null) {
-            welcomeLabel.setText(welcomeTextFor(chef));
+            welcomeLabel.setText(messaggioDiBenvenuto(chef));
         }
         // carica i corsi gestiti
-        loadCorsi();
+		caricaCorsi();
     }
 
-    private static String welcomeTextFor(Chef chef) {
+    private static String messaggioDiBenvenuto(Chef chef) {
         if (chef == null) {
             return "Benvenuto Chef";
         }
@@ -88,26 +96,26 @@ public class HomeBoundary {
         return (cognome != null && !cognome.isBlank()) ? ("Benvenuto Chef " + cognome) : "Benvenuto Chef";
     }
 
-    private void loadCorsi() {
+    private void caricaCorsi() {
         try {
             if (chef == null) {
                 return;
             }
-            var corsi = GestoreCorsi.getInstance().getCorsiGestiti(chef);
+            var corsi = GestoreCorsi.getInstanza().getCorsiGestiti(chef);
 
             idCol.setCellValueFactory(c -> {
                 Integer id = c.getValue() != null ? c.getValue().getIdCorso() : null;
-                return new javafx.beans.property.SimpleStringProperty(id != null ? String.valueOf(id) : "");
+                return new SimpleStringProperty(id != null ? String.valueOf(id) : "");
             });
-            nomeCol.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNome()));
-            dataCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getDataInizio()));
-            frequenzaCol.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFrequenza()));
-            sessioniCol.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getNumSessioni()).asObject());
-            partecipantiCol.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getNumPartecipanti()).asObject());
-            categorieCol.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(String.join(", ", c.getValue().getCategorie())));
+            nomeCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNome()));
+            dataCol.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getDataInizio()));
+            frequenzaCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getFrequenza()));
+            sessioniCol.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getNumSessioni()).asObject());
+            partecipantiCol.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getNumPartecipanti()).asObject());
+            categorieCol.setCellValueFactory(c -> new SimpleStringProperty(String.join(", ", c.getValue().getCategorie())));
 
-            corsiTable.setItems(javafx.collections.FXCollections.observableArrayList(corsi));
-            updateGestioneSessioniButtons(corsiTable.getSelectionModel().getSelectedItem() == null);
+            corsiTable.setItems(FXCollections.observableArrayList(corsi));
+            aggiornaGestioneSessioniButtons(corsiTable.getSelectionModel().getSelectedItem() == null);
         } catch (Exception e) {
             System.err.println("[HomeBoundary] Errore caricamento corsi: " + e.getMessage());
             e.printStackTrace();
@@ -126,7 +134,7 @@ public class HomeBoundary {
             CreazioneCorsoBoundary.class
         );
         if (opened) {
-            loadCorsi();
+			caricaCorsi();
         }
     }
 

@@ -87,8 +87,8 @@ public class NotificheBoundary {
             chefLabel.setText(nome != null && !nome.isBlank() ? nome : chef.getEmail());
         }
 
-        loadCorsiChoices();
-        refreshNotifiche();
+        caricaScelteCorsi();
+        aggiornaNotifiche();
     }
 
     @FXML
@@ -105,17 +105,17 @@ public class NotificheBoundary {
 
     @FXML
     private void onAggiornaClick(ActionEvent event) {
-        refreshNotifiche();
+        aggiornaNotifiche();
     }
 
-    private void refreshNotifiche() {
+    private void aggiornaNotifiche() {
         if (chef == null) {
             showWarning("Chef non valido.");
             return;
         }
 
         try {
-            List<Notifica> list = GestoreNotifiche.getInstance().getNotifiche(chef);
+            List<Notifica> list = GestoreNotifiche.getInstanza().getNotifiche(chef);
             if (notificheTable != null) {
                 notificheTable.setItems(javafx.collections.FXCollections.observableArrayList(list));
             }
@@ -168,7 +168,7 @@ public class NotificheBoundary {
         return (nome != null && !nome.isBlank()) ? (idCorso + " - " + nome) : String.valueOf(idCorso);
     }
 
-    private void loadCorsiChoices() {
+    private void caricaScelteCorsi() {
         corsoNameById.clear();
 
         if (chef == null) {
@@ -176,7 +176,7 @@ public class NotificheBoundary {
         }
 
         try {
-            List<Corso> corsi = GestoreCorsi.getInstance().getCorsiGestiti(chef);
+            List<Corso> corsi = GestoreCorsi.getInstanza().getCorsiGestiti(chef);
             for (Corso c : corsi) {
 				Integer id = c != null ? c.getIdCorso() : null;
                 String nome = c != null ? c.getNome() : null;
@@ -199,8 +199,8 @@ public class NotificheBoundary {
         }
 
         try {
-            GestoreNotifiche.getInstance().eliminaNotifica(selected.getIdNotifica());
-            refreshNotifiche();
+            GestoreNotifiche.getInstanza().eliminaNotifica(selected.getIdNotifica());
+            aggiornaNotifiche();
         } catch (RuntimeException ex) {
             showError(ex.getMessage());
         }

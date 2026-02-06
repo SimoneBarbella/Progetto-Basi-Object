@@ -13,7 +13,9 @@ import com.unina.foodlab.Enum.TipoSessione;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.collections.FXCollections;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -21,6 +23,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -53,7 +56,7 @@ public class GestioneSessioniBoundary {
     private TextField oraSessioneField;
 
     @FXML
-    private javafx.scene.control.ComboBox<TipoSessione> tipoSessioneCombo;
+    private ComboBox<TipoSessione> tipoSessioneCombo;
 
     @FXML
     private TextArea teoriaField;
@@ -151,21 +154,21 @@ public class GestioneSessioniBoundary {
                 corsoLabel.setText("ID " + id);
             }
         }
-        loadSessioni();
+        caricaSessioni();
     }
 
     public void initData(Corso corso) {
         initData(corso, null);
     }
 
-    private void loadSessioni() {
+    private void caricaSessioni() {
         if (corso == null) {
             return;
         }
         try {
-            java.util.List<Sessione> sessioni = GestoreSessioni.getInstance().getSessioniByCorso(corso);
+            List<Sessione> sessioni = GestoreSessioni.getInstanza().getSessioniByCorso(corso);
             if (sessioniTable != null) {
-                sessioniTable.setItems(javafx.collections.FXCollections.observableArrayList(sessioni));
+                sessioniTable.setItems(FXCollections.observableArrayList(sessioni));
                 if (!sessioni.isEmpty()) {
                     sessioniTable.getSelectionModel().selectFirst();
                 }
@@ -178,7 +181,7 @@ public class GestioneSessioniBoundary {
     }
 
     @FXML
-    private void onAddSessioneClick(ActionEvent event) {
+    private void onAggiungiSessioneClick(ActionEvent event) {
         if (corso == null) {
             InterfacciaFx.showWarning("Sessioni", "Corso non selezionato", "Impossibile creare una sessione senza un corso.");
             return;
@@ -196,11 +199,15 @@ public class GestioneSessioniBoundary {
 
         try {
             LocalDateTime dataOra = LocalDateTime.of(data, ora);
-            GestoreSessioni.getInstance().creaSessione(corso, dataOra, tipo, teoria);
+            if (corso.getDataInizio() != null && dataOra.toLocalDate().isBefore(corso.getDataInizio())) {
+                InterfacciaFx.showWarning("Sessioni", "Data sessione non valida", "La data della sessione non può essere precedente alla data d'inizio del corso (" + corso.getDataInizio() + ").");
+                return;
+            }
+            GestoreSessioni.getInstanza().creaSessione(corso, dataOra, tipo, teoria);
             if (dataSessionePicker != null) dataSessionePicker.setValue(null);
             if (oraSessioneField != null) oraSessioneField.clear();
             if (teoriaField != null) teoriaField.clear();
-            loadSessioni();
+            caricaSessioni();
         } catch (RuntimeException ex) {
             System.err.println("[GestioneSessioniBoundary] Errore creazione sessione: " + ex.getMessage());
             ex.printStackTrace();
@@ -252,7 +259,7 @@ public class GestioneSessioniBoundary {
     }
 
     @FXML
-    private void onOpenPraticheClick(ActionEvent event) {
+    private void onApriPraticheClick(ActionEvent event) {
         final Corso selectedCorso = corso;
         final Chef loggedChef = chef;
         NavigatoreScene.switchScene(

@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-final class RicetteIngredientiSectionController {
+final class RicetteIngredientiSectionUI {
 
     private static final int SUGGESTION_LIMIT = 8;
 
@@ -68,9 +68,9 @@ final class RicetteIngredientiSectionController {
 
     private final List<IngredienteQuantita> ingredientiNuovaRicetta = new ArrayList<>();
 
-    private final RicetteIngredientiTypeAheadController typeAhead;
+    private final RicetteSuggestionHelper typeAhead;
 
-    RicetteIngredientiSectionController(
+    RicetteIngredientiSectionUI(
         Label sessioneSelezionataLabel,
         TextField nuovaRicettaNomeField,
         TextArea nuovaRicettaDescrField,
@@ -107,7 +107,7 @@ final class RicetteIngredientiSectionController {
         this.reloadAll = reloadAll;
         this.openDettaglioRicetta = openDettaglioRicetta;
 
-        this.typeAhead = new RicetteIngredientiTypeAheadController(
+        this.typeAhead = new RicetteSuggestionHelper(
             nuovaRicettaNomeField,
             nuoveRicetteSuggestMenu,
             () -> ricetteDisponibiliMaster,
@@ -139,16 +139,16 @@ final class RicetteIngredientiSectionController {
         setupIngredientiListView();
         setupIngredienteQuantitaFieldListeners();
         typeAhead.bind();
-        refreshMasters();
-        refreshForSelection(null, null);
+        aggiornaMasters();
+        aggiornaPerSelezione(null, null);
     }
 
-    void refreshMasters() {
-        ricetteDisponibiliMaster.setAll(GestoreRicette.getInstance().getRicetteDisponibili());
-        ingredientiDisponibiliMaster.setAll(GestoreRicette.getInstance().getIngredientiDisponibili());
+    void aggiornaMasters() {
+        ricetteDisponibiliMaster.setAll(GestoreRicette.getInstanza().getRicetteDisponibili());
+        ingredientiDisponibiliMaster.setAll(GestoreRicette.getInstanza().getIngredientiDisponibili());
     }
 
-    void refreshForSelection(SessionePresenza selected, Integer numeroSessioneNelCorso) {
+    void aggiornaPerSelezione(SessionePresenza selected, Integer numeroSessioneNelCorso) {
         Integer idSessione = selected != null ? selected.getIdSessione() : null;
 
         if (sessioneSelezionataLabel != null) {
@@ -168,7 +168,7 @@ final class RicetteIngredientiSectionController {
 
         if (ricetteListView != null) {
             if (enable) {
-                var ricette = GestoreRicette.getInstance().getRicettePerSessione(idSessione);
+                var ricette = GestoreRicette.getInstanza().getRicettePerSessione(idSessione);
                 ricetteListView.setItems(FXCollections.observableArrayList(ricette));
                 if (!ricetteListView.getItems().isEmpty() && ricetteListView.getSelectionModel().getSelectedItem() == null) {
                     ricetteListView.getSelectionModel().selectFirst();
@@ -178,8 +178,8 @@ final class RicetteIngredientiSectionController {
             }
         }
 
-        updateDettagliRicetteButtonState();
-        updateRicetteVisibility();
+        aggiornaDettagliStatoRicetteButton();
+        aggiornaVisibilitaRicetta();
 
         if (!enable) {
             clearIngredientiUi();
@@ -188,7 +188,7 @@ final class RicetteIngredientiSectionController {
         }
     }
 
-    void onCreateRicettaClick(ActionEvent event, Integer idSessione) {
+    void onCreaRicettaClick(ActionEvent event, Integer idSessione) {
         if (idSessione == null) {
             showRicettaWarning("Seleziona una sessione valida.");
             return;
@@ -212,7 +212,7 @@ final class RicetteIngredientiSectionController {
         creaEAssociaNuovaRicetta(idSessione, ricettaInput);
     }
 
-    void onAddIngredienteClick(ActionEvent event, Integer idSessione) {
+    void onAggiungiIngredienteClick(ActionEvent event, Integer idSessione) {
         if (idSessione == null) {
             showRicettaWarning("Seleziona una sessione valida.");
             return;
@@ -233,7 +233,7 @@ final class RicetteIngredientiSectionController {
             this::displayRicetta
         ));
 
-        ricetteListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateDettagliRicetteButtonState());
+        ricetteListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> aggiornaDettagliStatoRicetteButton());
 
         ricetteListView.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2 && !ricetteListView.getSelectionModel().isEmpty()) {
@@ -268,7 +268,7 @@ final class RicetteIngredientiSectionController {
         if (ingredienteQuantitaField != null) ingredienteQuantitaField.setDisable(disable);
     }
 
-    private void updateDettagliRicetteButtonState() {
+    private void aggiornaDettagliStatoRicetteButton() {
         if (dettaglioRicettaButton == null) return;
 
         boolean hasSessione = sessioneSelezionata.get() != null && sessioneSelezionata.get().getIdSessione() != null;
@@ -279,14 +279,14 @@ final class RicetteIngredientiSectionController {
 
     private void setRicetteVisible(boolean visible) {
         if (ricetteListView != null) {
-            com.unina.foodlab.Boundary.util.InterfacciaFx.setVisibleManaged(ricetteListView, visible);
+            InterfacciaFx.setVisibleManaged(ricetteListView, visible);
         }
         if (ricetteActionsBox != null) {
-            com.unina.foodlab.Boundary.util.InterfacciaFx.setVisibleManaged(ricetteActionsBox, visible);
+            InterfacciaFx.setVisibleManaged(ricetteActionsBox, visible);
         }
     }
 
-    private void updateRicetteVisibility() {
+    private void aggiornaVisibilitaRicetta() {
         boolean hasRicette = ricetteListView != null
             && ricetteListView.getItems() != null
             && !ricetteListView.getItems().isEmpty();
@@ -295,10 +295,10 @@ final class RicetteIngredientiSectionController {
 
     private void setIngredientiVisible(boolean visible) {
         if (ingredientiListView != null) {
-            com.unina.foodlab.Boundary.util.InterfacciaFx.setVisibleManaged(ingredientiListView, visible);
+            InterfacciaFx.setVisibleManaged(ingredientiListView, visible);
         }
         if (ingredientiTitoloLabel != null) {
-            com.unina.foodlab.Boundary.util.InterfacciaFx.setVisibleManaged(ingredientiTitoloLabel, visible);
+            InterfacciaFx.setVisibleManaged(ingredientiTitoloLabel, visible);
         }
     }
 
@@ -333,7 +333,7 @@ final class RicetteIngredientiSectionController {
     private boolean tryAssociaRicettaEsistente(int idSessione, Ricetta ricettaEsistente) {
         if (ricettaEsistente == null || ricettaEsistente.getIdRicetta() == null) return false;
         try {
-            GestoreRicette.getInstance().associaRicettaSessione(idSessione, ricettaEsistente.getIdRicetta());
+            GestoreRicette.getInstanza().associaRicettaSessione(idSessione, ricettaEsistente.getIdRicetta());
             resetNuovaRicettaAfterAggiungiRicettaEsistente();
             reloadAll.run();
             return true;
@@ -345,14 +345,14 @@ final class RicetteIngredientiSectionController {
 
     private void creaEAssociaNuovaRicetta(int idSessione, RicettaFormValidator.RicettaCreationInput ricettaInput) {
         try {
-            Ricetta nuova = GestoreRicette.getInstance().creaRicettaConIngredienti(
+            Ricetta nuova = GestoreRicette.getInstanza().creaRicettaConIngredienti(
                 ricettaInput.nome(),
                 ricettaInput.descr(),
                 ricettaInput.tempo(),
                 ingredientiNuovaRicetta
             );
             if (nuova != null && nuova.getIdRicetta() != null) {
-                GestoreRicette.getInstance().associaRicettaSessione(idSessione, nuova.getIdRicetta());
+                GestoreRicette.getInstanza().associaRicettaSessione(idSessione, nuova.getIdRicetta());
             }
             clearNuovaRicettaTextFields();
             ingredientiNuovaRicetta.clear();

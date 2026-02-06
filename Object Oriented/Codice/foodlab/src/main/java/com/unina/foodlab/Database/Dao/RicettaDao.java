@@ -19,10 +19,10 @@ public class RicettaDao {
     private final Connection conn;
 
     public RicettaDao() {
-        this.conn = DatabaseConnection.getInstance().getConnection();
+        this.conn = DatabaseConnection.getInstanza().getConnection();
     }
 
-    public List<Ricetta> findAll() throws SQLException {
+    public List<Ricetta> cercaTutti() throws SQLException {
         String sql = "SELECT id_ricetta, nome, descrizione, tempo FROM Ricetta ORDER BY nome";
         List<Ricetta> result = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -40,7 +40,7 @@ public class RicettaDao {
         return result;
     }
 
-    public List<Ricetta> findBySessioneId(int idSessione) throws SQLException {
+    public List<Ricetta> cercaPerSessioneId(int idSessione) throws SQLException {
         String sql = "SELECT r.id_ricetta, r.nome, r.descrizione, r.tempo "
                 + "FROM Ricetta r JOIN Prepara p ON p.id_ricetta = r.id_ricetta "
                 + "WHERE p.id_sessione = ? ORDER BY r.nome";
@@ -62,7 +62,7 @@ public class RicettaDao {
         return result;
     }
 
-    public Ricetta insertRicetta(String nome, String descrizione, LocalTime tempo) throws SQLException {
+    public Ricetta inserisciRicetta(String nome, String descrizione, LocalTime tempo) throws SQLException {
         String sql = "INSERT INTO Ricetta(nome, descrizione, tempo) VALUES (?, ?, ?) RETURNING id_ricetta";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nome);
@@ -82,7 +82,7 @@ public class RicettaDao {
         return null;
     }
 
-    public void linkRicettaToSessione(int idSessione, int idRicetta) throws SQLException {
+    public void collegaRicettaASessione(int idSessione, int idRicetta) throws SQLException {
         String sql = "INSERT INTO Prepara(id_sessione, id_ricetta) VALUES (?, ?) ON CONFLICT DO NOTHING";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idSessione);
@@ -91,7 +91,7 @@ public class RicettaDao {
         }
     }
 
-    public void unlinkRicettaFromSessione(int idSessione, int idRicetta) throws SQLException {
+    public void scollegaRicettaDaSessione(int idSessione, int idRicetta) throws SQLException {
         String sql = "DELETE FROM Prepara WHERE id_sessione = ? AND id_ricetta = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idSessione);
@@ -100,7 +100,7 @@ public class RicettaDao {
         }
     }
 
-    public void addRichiede(int idRicetta, String nomeIngrediente, BigDecimal quantita) throws SQLException {
+    public void aggiungiRichiede(int idRicetta, String nomeIngrediente, BigDecimal quantita) throws SQLException {
         String sql = "INSERT INTO Richiede(id_ricetta, nome_ingrediente, quantita_necessaria) VALUES (?, ?, ?) "
                 + "ON CONFLICT (id_ricetta, nome_ingrediente) DO UPDATE SET quantita_necessaria = EXCLUDED.quantita_necessaria";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -111,7 +111,7 @@ public class RicettaDao {
         }
     }
 
-    public List<IngredienteQuantita> findIngredientiByRicettaId(int idRicetta) throws SQLException {
+    public List<IngredienteQuantita> cercaIngredientiPerRicettaId(int idRicetta) throws SQLException {
         String sql = "SELECT i.nome, i.unita_di_misura, r.quantita_necessaria "
                 + "FROM Richiede r JOIN Ingrediente i ON i.nome = r.nome_ingrediente "
                 + "WHERE r.id_ricetta = ? ORDER BY i.nome";

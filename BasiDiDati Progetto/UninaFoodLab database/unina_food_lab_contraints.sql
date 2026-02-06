@@ -52,7 +52,11 @@ ALTER TABLE Sessione ADD CONSTRAINT check_logica_sessione CHECK (
 -- Ricetta
 -- Nome e descrizione con caratteri validi
 ALTER TABLE Ricetta ADD CONSTRAINT check_nome_ricetta CHECK (nome ~ '^[A-Za-zÀ-ÿ ''-]+$');
-ALTER TABLE Ricetta ADD CONSTRAINT check_descrizione CHECK (descrizione ~ '^[A-Za-zÀ-ÿ ''-]+$');
+ALTER TABLE Ricetta ADD CONSTRAINT check_descrizione CHECK (
+    descrizione IS NOT NULL
+    AND LENGTH(descrizione) > 0
+    AND LENGTH(descrizione) <= 500
+);
 
 -- Richiede
 -- Quantità necessaria positiva

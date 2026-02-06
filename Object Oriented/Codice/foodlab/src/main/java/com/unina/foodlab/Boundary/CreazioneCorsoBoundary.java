@@ -65,7 +65,7 @@ public class CreazioneCorsoBoundary {
         }
 
         if (categorieField != null) {
-            categorieField.textProperty().addListener((obs, oldVal, newVal) -> updateCategorieSuggestions());
+            categorieField.textProperty().addListener((obs, oldVal, newVal) -> aggiornaSuggerimentiCategorie());
             categorieField.focusedProperty().addListener((obs, oldVal, newVal) -> {
                 if (!newVal) {
                     categorieSuggestionsMenu.hide();
@@ -77,14 +77,14 @@ public class CreazioneCorsoBoundary {
     public void initData(Chef chef) {
         this.chef = chef;
         try {
-            categorieEsistenti = GestoreCorsi.getInstance().getCategorieEsistenti();
+            categorieEsistenti = GestoreCorsi.getInstanza().getCategorieEsistenti();
         } catch (RuntimeException ex) {
             // se fallisce il caricamento, i suggerimenti restano vuoti 
             categorieEsistenti = List.of();
         }
     }
 
-    private void updateCategorieSuggestions() {
+    private void aggiornaSuggerimentiCategorie() {
         if (categorieField == null) {
             return;
         }
@@ -129,7 +129,7 @@ public class CreazioneCorsoBoundary {
         categorieSuggestionsMenu.getItems().clear();
         for (String match : matches) {
             MenuItem item = new MenuItem(match);
-            item.setOnAction(e -> applyCategoriaSuggestion(match));
+            item.setOnAction(e -> applicaSuggerimentiCategorie(match));
             categorieSuggestionsMenu.getItems().add(item);
         }
 
@@ -138,8 +138,8 @@ public class CreazioneCorsoBoundary {
         }
     }
 
-    private void applyCategoriaSuggestion(String suggestion) {
-        if (categorieField == null || suggestion == null) {
+    private void applicaSuggerimentiCategorie(String suggerimento) {
+        if (categorieField == null || suggerimento == null) {
             return;
         }
         String text = categorieField.getText();
@@ -160,7 +160,7 @@ public class CreazioneCorsoBoundary {
             prefix = "";
         }
 
-        String newText = prefix + suggestion;
+        String newText = prefix + suggerimento;
         categorieField.setText(newText);
         categorieField.positionCaret(newText.length());
         categorieSuggestionsMenu.hide();
@@ -184,7 +184,7 @@ public class CreazioneCorsoBoundary {
 
         Corso corso;
         try {
-			corso = GestoreCorsi.getInstance().creaCorso(dataInizio, nome, frequenza,
+            corso = GestoreCorsi.getInstanza().creaCorso(dataInizio, nome, frequenza,
                 numPartecipanti, numSessioni, categorie, chef);
         } catch (RuntimeException ex) {
             showError("Errore salvataggio", UtilEccezioni.messageOrFallback(ex, "Errore sconosciuto"));
