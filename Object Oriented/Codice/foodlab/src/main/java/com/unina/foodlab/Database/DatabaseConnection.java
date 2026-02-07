@@ -18,8 +18,8 @@ public class DatabaseConnection {
             Class.forName("org.postgresql.Driver");
 
             String url = "jdbc:postgresql://localhost:5432/postgres";
-            String user = "immo"; //Il tuo user di postgres
-            String password = "1234"; //La password è la tua di postgres
+            String user = ""; //Il tuo user di postgres
+            String password = ""; //La password è la tua di postgres
 
             // Apertura connessione 
             conn = DriverManager.getConnection(url, user, password);

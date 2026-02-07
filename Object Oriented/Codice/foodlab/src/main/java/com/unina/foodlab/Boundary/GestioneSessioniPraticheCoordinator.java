@@ -150,7 +150,7 @@ final class GestioneSessioniPraticheCoordinator {
     private Integer richiediIdSessioneSelezionataOAvvisa() {
         Integer idSessione = sessioneSelezionata != null ? sessioneSelezionata.getIdSessione() : null;
         if (idSessione == null) {
-            showRicettaWarning("Seleziona una sessione valida.");
+            InterfacciaFx.showWarning("Ricette", "Attenzione", "Seleziona una sessione valida.");
         }
         return idSessione;
     }
@@ -171,7 +171,7 @@ final class GestioneSessioniPraticheCoordinator {
 
     private void apriListaSpesa(SessionePresenza sessione) {
         if (sessione == null || sessione.getIdSessione() == null) {
-            showRicettaWarning("Seleziona una sessione valida.");
+            InterfacciaFx.showWarning("Ricette", "Attenzione", "Seleziona una sessione valida.");
             return;
         }
         final SessionePresenza selectedSessione = sessione;
@@ -187,7 +187,5 @@ final class GestioneSessioniPraticheCoordinator {
         );
     }
 
-    private void showRicettaWarning(String message) {
-        InterfacciaFx.showWarning("Ricette", "Attenzione", message);
-    }
+    
 }
