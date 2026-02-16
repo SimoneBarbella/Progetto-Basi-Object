@@ -26,14 +26,17 @@ public class NotificaDao {
             throw new IllegalArgumentException("emailChef non valida");
         }
 
-        String sql = "SELECT id_notifica, messaggio, data_invio, email_chef, id_corso "
-                + "FROM uninafoodlab.Notifica "
-                + "WHERE email_chef = ? "
-                + "ORDER BY data_invio DESC, id_notifica DESC";
+        String sql = "SELECT DISTINCT n.id_notifica, n.messaggio, n.data_invio, n.email_chef, n.id_corso "
+            + "FROM uninafoodlab.Notifica n "
+            + "LEFT JOIN uninafoodlab.Gestisce g ON g.id_corso = n.id_corso AND g.email_chef = ? "
+            + "WHERE n.email_chef = ? OR g.email_chef = ? "
+            + "ORDER BY n.data_invio DESC, n.id_notifica DESC";
 
         List<Notifica> result = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, emailChef);
+            ps.setString(2, emailChef);
+            ps.setString(3, emailChef);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Notifica n = new Notifica();

@@ -23,7 +23,7 @@ public class CorsoDao {
     /**
      * Salva un nuovo corso e lo collega allo Chef che lo crea.
      */
-    public boolean salva(Corso corso, Chef chef, List<String> categorie) throws SQLException {
+    public boolean save(Corso corso, Chef chef, List<String> categorie) throws SQLException {
         if (corso == null || chef == null) {
             throw new IllegalArgumentException("Corso e Chef non possono essere null");
         }
@@ -85,7 +85,7 @@ public class CorsoDao {
         }
     }
 
-    public List<Corso> cercaPerEmailChef(String emailChef) throws SQLException {
+    public List<Corso> findByChefEmail(String emailChef) throws SQLException {
         String sql = "SELECT c.id_corso, c.data_inizio, c.nome, c.frequenza, c.num_partecipanti, c.num_sessioni, "
                 + "string_agg(cc.categoria, ',') AS categorie "
                 + "FROM uninafoodlab.Corso c "
@@ -126,7 +126,7 @@ public class CorsoDao {
         return result;
     }
 
-    public List<String> cercaTutteCategorieDistinte() throws SQLException {
+    public List<String> findAllCategorieDistinct() throws SQLException {
         String sql = "SELECT DISTINCT categoria FROM uninafoodlab.Categoria_Corso WHERE categoria IS NOT NULL AND TRIM(categoria) <> '' ORDER BY categoria";
         List<String> result = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql);

@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class HomeBoundary {
 
@@ -101,7 +102,7 @@ public class HomeBoundary {
             if (chef == null) {
                 return;
             }
-            var corsi = GestoreCorsi.getInstanza().getCorsiGestiti(chef);
+            List<Corso> corsi = GestoreCorsi.getInstanza().getCorsiGestiti(chef);
 
             idCol.setCellValueFactory(c -> {
                 Integer id = c.getValue() != null ? c.getValue().getIdCorso() : null;

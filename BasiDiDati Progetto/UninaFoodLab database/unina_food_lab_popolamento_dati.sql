@@ -629,6 +629,43 @@ INSERT INTO Gestisce (email_chef, id_corso) VALUES
 ('chef.drg@unina.it', 15),
 ('chef.drg@unina.it', 21);
 
+-- Notifiche inviate dai chef per i corsi gestiti
+INSERT INTO Notifica (messaggio, email_chef, id_corso) VALUES
+('Non dimenticate di rivedere le tecniche base viste oggi e di annotare i vostri dubbi per la prossima lezione.', 'chef.cannav@email.it', 1),
+('Per la prossima lezione assicuratevi di avere tutti gli ingredienti freschi e di leggere le note teoriche in piattaforma.', 'chef.cannav@email.it', 5),
+('Non dimenticate di esercitarvi sui tagli di base e sulle tecniche di mise en place viste oggi.', 'chef.cannav@email.it', 7),
+('Non dimenticate di compilare il diario di bordo del corso segnando le difficolta incontrate.', 'chef.cannav@email.it', 10),
+('Non dimenticate di rivedere l organizzazione della brigata di cucina e i ruoli assegnati.', 'chef.cannav@email.it', 13),
+('Per il prossimo incontro controllate il materiale caricato in piattaforma e preparate eventuali domande sulle ricette.', 'chef.cannav@email.it', 20),
+('Non dimenticate di verificare gli strumenti necessari come coltelli e stampi per la prossima lezione.', 'chef.cannav@email.it', 22),
+('Per la prossima lezione rileggete le note su impasti e lievitazioni e annotate le principali criticita riscontrate.', 'chef.cannav@email.it', 26),
+
+('Per il prossimo incontro ricordate di controllare la lista ingredienti e di portare il grembiule.', 'chef.barb@email.it', 2),
+('Ricordate di controllare le intolleranze considerate nelle esercitazioni e di adattare le ricette di conseguenza.', 'chef.barb@email.it', 6),
+('Per il prossimo incontro preparate una breve idea di menu da discutere insieme in aula.', 'chef.barb@email.it', 8),
+('Ripassate le temperature di cottura corrette e fate attenzione ai tempi di riposo delle preparazioni.', 'chef.barb@email.it', 9),
+('Per la prossima lezione controllate le schede tecniche delle ricette e rivedete le dosi per porzione.', 'chef.barb@email.it', 11),
+('Per il prossimo incontro portate le vostre idee per un impiattamento creativo legato al tema del corso.', 'chef.barb@email.it', 14),
+('Non dimenticate di controllare la dispensa di casa e verificare quali ingredienti potete riutilizzare nelle ricette del corso.', 'chef.barb@email.it', 16),
+('Non dimenticate di rivedere le tecniche di cottura salutare e di pensare a una variante piu leggera di una ricetta classica.', 'chef.barb@email.it', 19),
+('Per il prossimo incontro pensate a una ricetta che vi rappresenta e che si colleghi al tema del corso.', 'chef.barb@email.it', 23),
+('Ricordate di ripassare tutte le tecniche affrontate finora perche nella prossima sessione le useremo insieme.', 'chef.barb@email.it', 27),
+
+('Ripassate la ricetta mostrata a lezione e provate a rifarla a casa prima della prossima sessione.', 'chef.dem@email.com', 3),
+('Per la prossima lezione rileggete le note sulla gestione dei tempi in cucina e sulle preparazioni anticipate.', 'chef.dem@email.com', 17),
+('Ricordate di fare attenzione agli abbinamenti tra sapori e consistenze pensando a un esempio da condividere in aula.', 'chef.dem@email.com', 18),
+('Ricordate di rivedere le tecniche di conservazione e di pensare a come riutilizzare gli avanzi in modo creativo.', 'chef.dem@email.com', 24),
+
+('Per il prossimo incontro ricordate di controllare la lista ingredienti e di portare il grembiule.', 'chef.grn@unina.it', 2),
+('Non dimenticate di esercitarvi sulle basi della pasticceria e di misurare con cura tutti gli ingredienti.', 'chef.grn@unina.it', 25),
+
+('Ripassate la ricetta mostrata a lezione e provate a rifarla a casa prima della prossima sessione.', 'chef.apr@unina.it', 3),
+
+('Non dimenticate di organizzare il piano di lavoro in cucina con attenzione ai tempi di cottura.', 'chef.drg@unina.it', 4),
+('Ricordate di provare almeno una delle ricette a casa e annotate eventuali varianti sperimentate.', 'chef.drg@unina.it', 12),
+('Ripassate le regole di sicurezza e igiene in cucina che saranno centrali nella prossima esercitazione.', 'chef.drg@unina.it', 15),
+('Ripassate gli appunti sulle cotture multiple e sulla gestione del servizio che useremo nella prossima pratica.', 'chef.drg@unina.it', 21);
+
 -- Iscrizioni al corso
 -- Iscrizioni al corso (raggruppate per corso)
 -- Corso 1

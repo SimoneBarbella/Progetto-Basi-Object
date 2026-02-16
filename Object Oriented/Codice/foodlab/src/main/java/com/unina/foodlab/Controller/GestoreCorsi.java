@@ -10,7 +10,7 @@ import com.unina.foodlab.Entity.Corso;
 
 public class GestoreCorsi {
 
-    private static GestoreCorsi instanza;
+    private static GestoreCorsi instance;
 
     private final CorsoDao corsoDao;
 
@@ -18,20 +18,20 @@ public class GestoreCorsi {
         this.corsoDao = new CorsoDao();
     }
 
-    public List<Corso> getCorsiGestiti(Chef chef) {
+    public java.util.List<com.unina.foodlab.Entity.Corso> getCorsiGestiti(Chef chef) {
         if (chef == null) throw new IllegalArgumentException("Chef non può essere null");
         try {
-            return corsoDao.cercaPerEmailChef(chef.getEmail());
+            return corsoDao.findByChefEmail(chef.getEmail());
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento corsi gestiti", e);
         }
     }
 
     public static synchronized GestoreCorsi getInstanza() {
-        if (instanza == null) {
-            instanza = new GestoreCorsi();
+        if (instance == null) {
+            instance = new GestoreCorsi();
         }
-        return instanza;
+        return instance;
     }
 
     public Corso creaCorso(LocalDate dataInizio, String nome, String frequenza,
@@ -48,7 +48,7 @@ public class GestoreCorsi {
         corso.setNumSessioni(numSessioni);
 
         try {
-            boolean ok = corsoDao.salva(corso, chef, categorie);
+            boolean ok = corsoDao.save(corso, chef, categorie);
             return ok ? corso : null;
         } catch (SQLException e) {
             System.err.println("Errore durante il salvataggio del corso: " + e.getMessage());
@@ -59,7 +59,7 @@ public class GestoreCorsi {
 
     public List<String> getCategorieEsistenti() {
         try {
-            return corsoDao.cercaTutteCategorieDistinte();
+            return corsoDao.findAllCategorieDistinct();
         } catch (SQLException e) {
             throw new RuntimeException("Errore caricamento categorie esistenti", e);
         }
